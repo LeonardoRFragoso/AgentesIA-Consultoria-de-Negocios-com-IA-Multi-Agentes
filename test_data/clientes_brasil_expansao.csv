@@ -1,0 +1,51 @@
+cliente_id,nome_empresa,segmento,mrr_brl,data_inicio,pais,funcionarios,nps_score,uso_produto_pct
+C001,TechSolutions Ltda,Tecnologia,15000,2023-03-15,Brasil,120,9,85
+C002,Banco Digital Prime,Financeiro,45000,2022-08-20,Brasil,450,8,92
+C003,Varejo Express SA,Varejo,8500,2024-01-10,Brasil,80,7,65
+C004,Logistica Rapida,Logistica,12000,2023-06-22,Brasil,200,9,88
+C005,Saude+ Clinicas,Saude,18000,2022-12-01,Brasil,150,8,78
+C006,EdTech Academy,Educacao,6500,2024-03-05,Brasil,45,9,91
+C007,Agro Moderna,Agronegocio,22000,2023-01-18,Brasil,300,7,72
+C008,Industria 4.0 Corp,Industria,35000,2022-05-30,Brasil,520,8,85
+C009,Energia Limpa SA,Energia,28000,2023-09-12,Brasil,180,9,89
+C010,Construtech Build,Construcao,9500,2024-02-28,Brasil,95,7,68
+C011,Fintech Pay,Financeiro,38000,2022-11-15,Brasil,280,9,94
+C012,Retailer Pro,Varejo,11000,2023-07-08,Brasil,110,8,76
+C013,HealthTech Med,Saude,16000,2023-04-25,Brasil,130,8,82
+C014,TransLog Express,Logistica,14500,2022-09-10,Brasil,175,9,87
+C015,SmartFactory,Industria,42000,2022-04-18,Brasil,480,8,90
+C016,GreenEnergy,Energia,31000,2023-02-14,Brasil,220,9,86
+C017,EduPlatform,Educacao,7800,2024-04-01,Brasil,55,8,79
+C018,AgroTech Solutions,Agronegocio,25000,2022-10-22,Brasil,340,8,83
+C019,BuildSmart,Construcao,10500,2023-11-30,Brasil,105,7,71
+C020,DigitalBank Corp,Financeiro,52000,2022-03-08,Brasil,600,9,95
+C021,FastRetail,Varejo,9200,2024-01-25,Brasil,88,7,67
+C022,MedTech Health,Saude,19500,2023-05-17,Brasil,165,8,84
+C023,LogiPro,Logistica,13200,2023-08-05,Brasil,190,8,80
+C024,IndustrySmart,Industria,38500,2022-06-12,Brasil,510,9,91
+C025,SolarTech,Energia,27000,2023-03-28,Brasil,195,8,85
+C026,LearnTech,Educacao,8200,2024-02-10,Brasil,62,9,88
+C027,AgriSmart,Agronegocio,23500,2022-12-18,Brasil,310,8,81
+C028,ConstructPro,Construcao,11500,2023-10-08,Brasil,115,7,73
+C029,CryptoBank,Financeiro,48000,2022-07-25,Brasil,380,9,93
+C030,ShopExpress,Varejo,10200,2023-12-05,Brasil,92,8,75
+C031,ClinicPlus,Saude,17500,2023-06-30,Brasil,145,8,80
+C032,CargoFast,Logistica,15800,2022-08-15,Brasil,210,9,86
+C033,AutoFactory,Industria,41000,2022-04-30,Brasil,495,8,89
+C034,WindPower,Energia,29500,2023-01-22,Brasil,205,9,87
+C035,SkillUp,Educacao,7200,2024-03-18,Brasil,48,8,77
+C036,FarmTech,Agronegocio,24500,2023-02-08,Brasil,325,8,82
+C037,BuilderTech,Construcao,10800,2023-09-25,Brasil,100,7,69
+C038,NeoBank,Financeiro,55000,2022-02-14,Brasil,650,9,96
+C039,MarketPro,Varejo,9800,2024-01-12,Brasil,85,7,66
+C040,HealthPlus,Saude,20500,2023-04-10,Brasil,175,8,83
+C041,TransportMax,Logistica,14000,2022-10-05,Brasil,185,8,79
+C042,SmartIndustry,Industria,39500,2022-05-20,Brasil,525,9,92
+C043,CleanEnergy,Energia,30000,2023-02-28,Brasil,215,9,88
+C044,EduTech Pro,Educacao,8500,2024-02-22,Brasil,58,8,81
+C045,AgriPro,Agronegocio,26000,2022-11-10,Brasil,350,8,84
+C046,ConstructMax,Construcao,12000,2023-08-18,Brasil,120,7,72
+C047,DigitalPay,Financeiro,50000,2022-04-05,Brasil,420,9,94
+C048,RetailMax,Varejo,10500,2023-11-15,Brasil,98,8,74
+C049,MedPlus,Saude,18500,2023-05-28,Brasil,155,8,81
+C050,LogiMax,Logistica,16500,2022-09-22,Brasil,225,9,85

@@ -1,0 +1,12 @@
+pais,mercado_tam_milhoes_usd,crescimento_anual_pct,concorrentes_principais,regulacao_gdpr,idioma_principal,custo_entrada_estimado_usd,facilidade_negocios_rank,saas_b2b_maturidade
+Alemanha,450,12,SAP;Salesforce;HubSpot,Rigoroso,Alemao,250000,22,Alta
+Reino Unido,380,15,Salesforce;Microsoft;Zendesk,Moderado,Ingles,180000,8,Alta
+Franca,320,10,Salesforce;SAP;Dassault,Rigoroso,Frances,220000,32,Media
+Espanha,180,14,Salesforce;Oracle;Local,Moderado,Espanhol,120000,30,Media
+Portugal,45,18,Salesforce;Local;Primavera,Moderado,Portugues,80000,39,Media
+Holanda,95,16,Salesforce;Microsoft;Exact,Rigoroso,Holandes,150000,42,Alta
+Belgica,75,11,SAP;Salesforce;Local,Rigoroso,Frances;Holandes,140000,46,Media
+Italia,220,9,SAP;Oracle;Zucchetti,Rigoroso,Italiano,200000,58,Baixa
+Suecia,85,17,Salesforce;Fortnox;Visma,Moderado,Sueco,130000,10,Alta
+Irlanda,55,20,Salesforce;HubSpot;Intercom,Moderado,Ingles,100000,24,Alta
+Polonia,65,22,Salesforce;Comarch;Local,Moderado,Polones,90000,40,Media

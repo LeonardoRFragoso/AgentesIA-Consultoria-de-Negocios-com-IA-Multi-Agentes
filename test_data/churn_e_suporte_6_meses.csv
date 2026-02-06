@@ -1,0 +1,7 @@
+mes,clientes_inicio,clientes_cancelados,churn_pct,tickets_suporte,tempo_resposta_hrs,satisfacao_suporte,atualizacoes_produto,bugs_reportados,nps_medio
+2025-07,1000,50,5.0,320,4.2,4.1,3,45,72
+2025-08,950,52,5.5,380,5.1,3.9,2,52,68
+2025-09,898,58,6.5,420,6.8,3.6,1,68,62
+2025-10,840,63,7.5,485,8.2,3.3,1,85,55
+2025-11,777,59,7.6,510,9.5,3.1,0,92,48
+2025-12,718,58,8.1,545,11.2,2.8,0,98,42
