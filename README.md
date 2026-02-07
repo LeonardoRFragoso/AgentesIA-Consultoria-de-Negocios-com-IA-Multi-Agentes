@@ -1,92 +1,148 @@
-# 🧠 Consultor de Negócios Multi-Agentes com Streamlit
+# 🧠 AgentesIA - Consultoria de Negócios com IA Multi-Agentes
 
-Um sistema de análise estratégica de negócios que simula um time executivo completo, utilizando múltiplos agentes de IA para fornecer diagnósticos estruturados e acionáveis.
+Plataforma SaaS de análise estratégica de negócios que utiliza múltiplos agentes de IA especializados para fornecer diagnósticos completos e acionáveis.
 
 ## 🎯 Visão Geral
 
-Este projeto implementa uma arquitetura multi-agentes que permite:
+O **AgentesIA** é uma plataforma completa que simula um time executivo de consultores, oferecendo:
 
-- **Análise estruturada** de problemas de negócio em linguagem natural
-- **Perspectivas complementares** de 5 especialistas virtuais
-- **Validação cruzada** entre agentes para coerência
-- **Diagnóstico executivo** consolidado e priorizado
-- **Interface intuitiva** via Streamlit
+- **Análise multi-perspectiva** de problemas de negócio
+- **5 agentes especializados** trabalhando em conjunto
+- **Upload de arquivos** (CSV, Excel, PDF) para análise contextualizada
+- **Consultor IA Contínuo** - chat de follow-up pós-análise
+- **Exportação de relatórios** em PDF, DOCX e PPTX
+- **Sistema de planos** (Free, Pro, Enterprise) com limites configuráveis
 
-## 👥 Time de Agentes
+## ✨ Funcionalidades Principais
 
-1. **🔍 Analista de Negócio**: Interpreta problemas e levanta hipóteses
-2. **💼 Estrategista Comercial**: Propõe ações práticas e estratégias
-3. **💰 Analista Financeiro**: Avalia viabilidade e ROI
-4. **📊 Especialista de Mercado**: Valida com benchmarks e tendências
-5. **👔 Revisor Executivo**: Consolida análises em decisão final
+### � Análise Multi-Agentes
+| Agente | Especialidade |
+|--------|---------------|
+| 🔍 **Analista de Negócio** | Interpreta problemas e levanta hipóteses |
+| 💼 **Estrategista Comercial** | Propõe ações práticas e estratégias |
+| 💰 **Analista Financeiro** | Avalia viabilidade e ROI |
+| � **Especialista de Mercado** | Valida com benchmarks e tendências |
+| 👔 **Revisor Executivo** | Consolida análises em decisão final |
 
-## 🚀 Como Usar
+### � Consultor IA Contínuo (Novo!)
+Continue a conversa após a análise para:
+- Aprofundar pontos específicos
+- Esclarecer dúvidas
+- Refinar estratégias
+- A IA já conhece seu contexto e dados
 
-### Instalação
+### 📎 Upload de Arquivos
+Anexe dados para análise contextualizada:
+- **CSV/TXT**: Extração completa de texto
+- **Excel (.xlsx)**: Leitura de até 3 abas, 50 linhas
+- **PDF**: Extração de até 10 páginas
 
+### 📥 Exportação de Relatórios
+Exporte análises completas (incluindo chat de refino):
+- **PDF**: Formatação profissional
+- **DOCX**: Editável no Word
+- **PPTX**: Pronto para apresentações
+
+## 💰 Planos e Limites
+
+| Recurso | Free | Pro (R$99/mês) | Enterprise (R$299/mês) |
+|---------|------|----------------|------------------------|
+| Análises/mês | 5 | 50 | Ilimitado |
+| Agentes | 3 | 5 | 5 |
+| Perguntas de refino/análise | 3 | 20 | Ilimitado |
+| Exportação PDF | ❌ | ✅ | ✅ |
+| Exportação DOCX/PPTX | ❌ | ❌ | ✅ |
+
+## 🚀 Como Executar
+
+### Pré-requisitos
+- Python 3.10+
+- Node.js 18+
+- Chave de API da Anthropic
+
+### 1. Clone o repositório
 ```bash
-# Clone ou navegue até o diretório do projeto
-cd "Agente Multi-Agentes de Negócio com Streamlit"
+git clone https://github.com/LeonardoRFragoso/Agente-Multi-Agentes-de-Negocio-com-Streamlit.git
+cd Agente-Multi-Agentes-de-Negocio-com-Streamlit
+```
 
-# Instale as dependências
+### 2. Configure o Backend
+```bash
+cd backend
+
+# Crie ambiente virtual
+python -m venv venv
+venv\Scripts\activate  # Windows
+# source venv/bin/activate  # Linux/Mac
+
+# Instale dependências
 pip install -r requirements.txt
+
+# Configure variáveis de ambiente
+cp .env.example .env
+# Edite .env e adicione sua ANTHROPIC_API_KEY
+
+# Inicie o servidor
+python -m uvicorn main:app --reload --port 8000
 ```
 
-### Configuração de API Key
-
-O projeto utiliza Claude AI (Anthropic). Configure sua chave de API:
-
+### 3. Configure o Frontend
 ```bash
-# Windows (PowerShell)
-$env:ANTHROPIC_API_KEY = "sua-chave-aqui"
+cd frontend
 
-# Windows (CMD)
-set ANTHROPIC_API_KEY=sua-chave-aqui
+# Instale dependências
+npm install
 
-# Linux/Mac
-export ANTHROPIC_API_KEY="sua-chave-aqui"
+# Configure variáveis de ambiente
+cp .env.example .env.local
+
+# Inicie o servidor de desenvolvimento
+npm run dev
 ```
 
-Obtenha sua chave em: https://console.anthropic.com/
-
-### Executar a Aplicação
-
-```bash
-streamlit run app.py
-```
-
-A aplicação abrirá em `http://localhost:8501`
+### 4. Acesse a aplicação
+- **Frontend**: http://localhost:3000
+- **API Docs**: http://localhost:8000/docs
 
 ## 📁 Estrutura do Projeto
 
 ```
-agente-multi-agentes/
-├── app.py                      # Interface Streamlit
-├── requirements.txt            # Dependências
-├── README.md                   # Este arquivo
+agentesia/
+├── backend/                    # API FastAPI
+│   ├── main.py                 # Endpoints principais
+│   ├── agents/                 # Agentes de IA
+│   │   ├── analyst.py
+│   │   ├── commercial.py
+│   │   ├── financial.py
+│   │   ├── market.py
+│   │   └── reviewer.py
+│   ├── core/                   # Lógica central
+│   │   ├── agent.py            # Classe base de agentes
+│   │   ├── types.py            # Tipos e modelos
+│   │   └── exceptions.py
+│   ├── orchestrator/           # Orquestração de agentes
+│   │   ├── orchestrator.py
+│   │   └── dag.py              # Resolução de dependências
+│   ├── prompts/                # Prompts dos agentes
+│   └── requirements.txt
 │
-├── agents/                     # Módulos de agentes
-│   ├── __init__.py
-│   ├── analyst.py              # Análise de negócio
-│   ├── commercial.py           # Estratégia comercial
-│   ├── financial.py            # Análise financeira
-│   ├── market.py               # Contexto de mercado
-│   └── reviewer.py             # Consolidação executiva
+├── frontend/                   # Next.js + React
+│   ├── src/
+│   │   ├── app/                # Páginas (App Router)
+│   │   │   ├── (auth)/         # Login/Register
+│   │   │   ├── (dashboard)/    # Dashboard protegido
+│   │   │   │   ├── dashboard/
+│   │   │   │   ├── nova-analise/
+│   │   │   │   ├── analise/[id]/
+│   │   │   │   └── billing/
+│   │   │   └── page.tsx        # Landing page
+│   │   ├── components/         # Componentes React
+│   │   ├── services/           # API client
+│   │   └── stores/             # Estado global (Zustand)
+│   └── package.json
 │
-├── team/                       # Orquestração
-│   ├── __init__.py
-│   └── business_team.py        # Coordenação de agentes
-│
-├── prompts/                    # Instruções de sistema
-│   ├── analyst.md
-│   ├── commercial.md
-│   ├── financial.md
-│   ├── market.md
-│   └── reviewer.md
-│
-└── utils/                      # Utilitários
-    ├── __init__.py
-    └── formatting.py           # Formatação de saída
+├── docs/                       # Documentação
+└── docker-compose.yml          # Deploy com Docker
 ```
 
 ## 💡 Exemplos de Uso
@@ -103,115 +159,135 @@ Qual pode ser a causa e como devemos responder?"
 Quais são os principais riscos e oportunidades?"
 ```
 
-### Exemplo 3: Retenção de Clientes
+### Exemplo 3: Retenção de Clientes (com arquivo anexo)
 ```
-"Nosso churn aumentou de 5% para 8% ao mês. 
-Como podemos reverter essa tendência?"
+Problema: "Nosso churn aumentou de 5% para 8% ao mês."
+Anexo: churn_dados.xlsx
 ```
 
 ## 🔄 Fluxo de Funcionamento
 
 ```
-1. Usuário descreve problema
+1. Usuário descreve problema + anexa arquivos (opcional)
    ↓
-2. Analista interpreta e levanta hipóteses
+2. Sistema extrai conteúdo dos arquivos
    ↓
-3. Comercial propõe estratégias
+3. Analista interpreta e levanta hipóteses
    ↓
-4. Financeiro avalia viabilidade
+4. Comercial propõe estratégias
    ↓
-5. Mercado valida contexto
+5. Financeiro avalia viabilidade (Pro/Enterprise)
    ↓
-6. Revisor consolida análises
+6. Mercado valida contexto (Pro/Enterprise)
    ↓
-7. Diagnóstico executivo é exibido
+7. Revisor consolida análises
+   ↓
+8. Diagnóstico executivo é exibido
+   ↓
+9. Usuário pode refinar com perguntas de follow-up
+   ↓
+10. Exportar relatório completo (Pro/Enterprise)
 ```
 
-## 🎨 Interface Streamlit
+## 🎨 Interface
 
-- **Sidebar**: Configurações (tipo de negócio, profundidade de análise)
-- **Área Principal**: Campo de entrada e resultados
-- **Abas Expansíveis**: Análises detalhadas por agente
-- **Seção Executiva**: Diagnóstico consolidado em destaque
-- **Download**: Exportar relatório em Markdown
+### Landing Page
+- Hero com proposta de valor
+- Destaque do recurso "Consultor IA Contínuo"
+- Features e benefícios
+- Planos e preços
 
-## 📊 Saídas
+### Dashboard
+- Lista de análises recentes
+- Status em tempo real (pending, running, completed)
+- Acesso rápido a nova análise
 
-### Diagnóstico Executivo
-- Síntese do problema
-- Análise de coerência entre agentes
-- Recomendação estratégica
-- Plano de ação consolidado
-- Métricas de sucesso
-- Riscos críticos
-- Próximos passos (30 dias)
+### Página de Análise
+- Visualização por agente (abas)
+- Chat de refino com contador de uso
+- Exportação em múltiplos formatos
+- Animação de loading com carrossel de agentes
 
-### Análises Detalhadas
-Cada agente fornece sua perspectiva estruturada:
-- Hipóteses e validações
-- Ações recomendadas
-- Estimativas de impacto
-- Riscos e oportunidades
+## �️ Tecnologias
 
-## 🔧 Customização
+### Backend
+- **Framework**: FastAPI
+- **IA**: Claude (Anthropic) via API
+- **Autenticação**: JWT
+- **PDF**: ReportLab
+- **DOCX**: python-docx
+- **PPTX**: python-pptx
+- **Excel**: openpyxl
+- **PDF Reader**: PyPDF2
 
-### Modificar Prompts
-Edite os arquivos em `prompts/` para ajustar o comportamento dos agentes:
-- Estilo de resposta
-- Foco de análise
-- Nível de detalhe
-
-### Adicionar Novos Agentes
-1. Crie `agents/novo_agente.py`
-2. Implemente função com padrão similar aos existentes
-3. Adicione prompt em `prompts/novo_agente.md`
-4. Integre em `team/business_team.py`
-
-### Mudar Modelo de IA
-Edite o `model` em cada arquivo de agente:
-```python
-model="claude-3-5-sonnet-20241022"  # Altere para outro modelo
-```
+### Frontend
+- **Framework**: Next.js 14 (App Router)
+- **UI**: Tailwind CSS
+- **Componentes**: Lucide Icons
+- **Estado**: Zustand
+- **HTTP**: Axios
+- **Notificações**: Sonner
 
 ## 📈 Roadmap
 
-- [ ] Integração com dados reais (CSV, Excel, Google Sheets)
+- [x] ~~Integração com dados reais (CSV, Excel, PDF)~~
+- [x] ~~Exportação em PDF, DOCX, PPTX~~
+- [x] ~~Chat de refino pós-análise~~
+- [x] ~~Sistema de planos e limites~~
+- [x] ~~Containerização com Docker~~
+- [ ] Integração com Mercado Pago (pagamentos)
 - [ ] Memória de longo prazo por empresa
-- [ ] Histórico de análises
+- [ ] Histórico de análises persistente
 - [ ] Modo comparativo (cenário A vs B)
-- [ ] Exportação em PDF
-- [ ] Deploy em Streamlit Cloud
-- [ ] Containerização com Docker
+- [ ] Deploy em produção
 
 ## 🛠️ Troubleshooting
 
 ### Erro: "ANTHROPIC_API_KEY not found"
-- Verifique se a variável de ambiente está configurada
-- Reinicie o terminal após configurar
+```bash
+# Verifique o arquivo .env no backend
+cat backend/.env
+# Deve conter: ANTHROPIC_API_KEY=sk-ant-...
+```
 
 ### Erro: "Module not found"
-- Certifique-se de estar no diretório correto
-- Reinstale dependências: `pip install -r requirements.txt`
+```bash
+cd backend
+pip install -r requirements.txt
+```
 
-### Respostas lentas
-- Modelos de IA podem levar alguns segundos
-- Verifique sua conexão com internet
+### Frontend não conecta ao backend
+```bash
+# Verifique se o backend está rodando na porta 8000
+# E se o frontend tem NEXT_PUBLIC_API_URL=http://localhost:8000
+```
 
-## 📝 Notas Técnicas
+## 📝 Variáveis de Ambiente
 
-- **Modelo**: Claude 3.5 Sonnet (Anthropic)
-- **Framework Web**: Streamlit
-- **Linguagem**: Python 3.8+
-- **Arquitetura**: Multi-agentes com orquestração sequencial
+### Backend (.env)
+```env
+ANTHROPIC_API_KEY=sk-ant-xxxxx
+SECRET_KEY=sua-chave-jwt-secreta
+DATABASE_URL=sqlite:///./agentesia.db
+```
 
-## 💼 Casos de Uso
+### Frontend (.env.local)
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
 
-- Diagnóstico estratégico de negócios
-- Validação de hipóteses comerciais
-- Análise de cenários
-- Suporte a decisões executivas
-- Educação em estratégia de negócios
-- Prototipagem de ideias
+## � Docker
+
+```bash
+# Build e run
+docker-compose up --build
+
+# Apenas backend
+docker-compose up backend
+
+# Apenas frontend  
+docker-compose up frontend
+```
 
 ## 📄 Licença
 
@@ -219,15 +295,17 @@ Este projeto é fornecido como está para fins educacionais e de portfólio.
 
 ## 🤝 Contribuições
 
-Sinta-se livre para:
-- Melhorar prompts
-- Adicionar novos agentes
+Contribuições são bem-vindas! Sinta-se livre para:
+- Melhorar prompts dos agentes
+- Adicionar novos agentes especializados
 - Otimizar a interface
+- Implementar novos formatos de exportação
 - Sugerir novos recursos
 
-## 📞 Suporte
+## � Autor
 
-Para dúvidas ou sugestões, consulte a documentação dos prompts em `prompts/` ou ajuste conforme necessário.
+**Leonardo Fragoso**
+- GitHub: [@LeonardoRFragoso](https://github.com/LeonardoRFragoso)
 
 ---
 
