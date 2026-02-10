@@ -21,27 +21,36 @@ class BillingService:
     """
     
     # Limites por plano
+    # Agentes disponíveis
+    ALL_AGENTS = ["analyst", "commercial", "financial", "market", "reviewer"]
+    
     PLAN_LIMITS = {
         PlanType.FREE: {
-            "executions_per_month": 10,
+            "executions_per_month": 5,
             "tokens_per_day": None,  # Sem limite diário
             "users": 1,
             "history_days": 7,
             "exports": False,
+            "max_agents": 2,  # Usuário escolhe 2 agentes
+            "agents_allowed": ALL_AGENTS,  # Pode escolher qualquer um
         },
         PlanType.PRO: {
-            "executions_per_month": None,  # Ilimitado
+            "executions_per_month": 50,
             "tokens_per_day": 100000,
             "users": 5,
             "history_days": 90,
             "exports": True,
+            "max_agents": 5,  # Todos os agentes
+            "agents_allowed": ALL_AGENTS,
         },
         PlanType.ENTERPRISE: {
-            "executions_per_month": None,
+            "executions_per_month": None,  # Ilimitado
             "tokens_per_day": None,
             "users": 999,
             "history_days": 365,
             "exports": True,
+            "max_agents": 5,
+            "agents_allowed": ALL_AGENTS,
         },
     }
     
@@ -82,6 +91,59 @@ class BillingService:
                 return False, "Limite diário de tokens atingido. Tente novamente amanhã."
         
         return True, None
+    
+    def validate_agents(self, org_id: UUID, selected_agents: list) -> Tuple[bool, Optional[str], list]:
+        """
+        Valida seleção de agentes baseado no plano.
+        
+        Returns:
+            Tuple[bool, Optional[str], list]: (válido, mensagem_erro, agentes_a_usar)
+        """
+        org = self.db.query(Organization).filter(Organization.id == org_id).first()
+        
+        if not org:
+            return False, "Organização não encontrada", []
+        
+        limits = self.PLAN_LIMITS.get(org.plan, self.PLAN_LIMITS[PlanType.FREE])
+        max_agents = limits.get("max_agents", 2)
+        allowed_agents = limits.get("agents_allowed", self.ALL_AGENTS)
+        
+        # Se plano permite todos os agentes, usa todos
+        if max_agents >= 5:
+            return True, None, self.ALL_AGENTS
+        
+        # Valida que agentes selecionados existem
+        invalid_agents = [a for a in selected_agents if a not in allowed_agents]
+        if invalid_agents:
+            return False, f"Agentes inválidos: {invalid_agents}", []
+        
+        # Valida quantidade de agentes
+        if len(selected_agents) > max_agents:
+            return False, f"Plano Free permite no máximo {max_agents} agentes. Faça upgrade para Pro.", []
+        
+        if len(selected_agents) < 1:
+            return False, "Selecione pelo menos 1 agente.", []
+        
+        # Sempre inclui reviewer para gerar resumo executivo
+        agents_to_use = list(selected_agents)
+        if "reviewer" not in agents_to_use:
+            agents_to_use.append("reviewer")
+        
+        return True, None, agents_to_use
+    
+    def get_agent_limits(self, org_id: UUID) -> dict:
+        """Retorna limites de agentes para o plano da organização."""
+        org = self.db.query(Organization).filter(Organization.id == org_id).first()
+        
+        if not org:
+            return {"max_agents": 2, "agents_allowed": self.ALL_AGENTS}
+        
+        limits = self.PLAN_LIMITS.get(org.plan, self.PLAN_LIMITS[PlanType.FREE])
+        return {
+            "max_agents": limits.get("max_agents", 2),
+            "agents_allowed": limits.get("agents_allowed", self.ALL_AGENTS),
+            "plan": org.plan.value
+        }
     
     def check_can_export(self, org_id: UUID) -> Tuple[bool, Optional[str]]:
         """Verifica se organização pode exportar análises."""

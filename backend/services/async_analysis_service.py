@@ -55,7 +55,8 @@ class AsyncAnalysisService:
         problem_description: str,
         business_type: str = "B2B",
         analysis_depth: str = "Padrão",
-        use_cache: bool = True
+        use_cache: bool = True,
+        selected_agents: list = None
     ) -> Dict[str, Any]:
         """
         Cria análise e enfileira para processamento.
@@ -113,6 +114,7 @@ class AsyncAnalysisService:
                 "problem_description": problem_description,
                 "business_type": business_type,
                 "analysis_depth": analysis_depth,
+                "selected_agents": selected_agents or ["analyst", "commercial", "financial", "market", "reviewer"],
             },
             org_id=self.org_id,
             user_id=self.user_id,
@@ -309,7 +311,8 @@ async def handle_analysis_task(payload: Dict[str, Any]) -> Dict[str, Any]:
         # Executa orquestrador multi-agentes
         from team.business_team import BusinessTeam
         
-        team = BusinessTeam()
+        selected_agents = payload.get("selected_agents", ["analyst", "commercial", "financial", "market", "reviewer"])
+        team = BusinessTeam(selected_agents=selected_agents)
         results = team.analyze_business_scenario(
             problem_description=payload["problem_description"],
             business_type=payload["business_type"],

@@ -13,20 +13,39 @@ from agents import (
 class BusinessTeam:
     """Wrapper síncrono para orquestração de agentes de negócio"""
     
-    def __init__(self):
+    # Mapeamento de nomes para classes de agentes
+    AGENT_CLASSES = {
+        "analyst": AnalystAgent,
+        "commercial": CommercialAgent,
+        "financial": FinancialAgent,
+        "market": MarketAgent,
+        "reviewer": ReviewerAgent,
+    }
+    
+    def __init__(self, selected_agents: list = None):
+        """
+        Inicializa o time de agentes.
+        
+        Args:
+            selected_agents: Lista de agentes a usar. Se None, usa todos.
+                           Opções: analyst, commercial, financial, market, reviewer
+        """
         self.problem_description = None
         self.context = None
         self.orchestrator = None
+        self.selected_agents = selected_agents or list(self.AGENT_CLASSES.keys())
     
     def _create_orchestrator(self) -> BusinessOrchestrator:
-        """Cria orquestrador com todos os agentes"""
-        agents = {
-            "analyst": AnalystAgent(),
-            "commercial": CommercialAgent(),
-            "financial": FinancialAgent(),
-            "market": MarketAgent(),
-            "reviewer": ReviewerAgent(),
-        }
+        """Cria orquestrador apenas com agentes selecionados"""
+        agents = {}
+        for agent_name in self.selected_agents:
+            if agent_name in self.AGENT_CLASSES:
+                agents[agent_name] = self.AGENT_CLASSES[agent_name]()
+        
+        # Sempre inclui reviewer se não estiver presente (para resumo executivo)
+        if "reviewer" not in agents:
+            agents["reviewer"] = ReviewerAgent()
+        
         return BusinessOrchestrator(agents)
     
     def analyze_business_scenario(self, problem_description: str, business_type: str = "B2B") -> dict:

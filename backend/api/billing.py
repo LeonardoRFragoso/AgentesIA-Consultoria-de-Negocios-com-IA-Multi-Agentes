@@ -38,7 +38,9 @@ async def get_plans():
                 "limits": {
                     "analyses_per_month": 5,
                     "export_formats": ["markdown"],
-                    "priority_support": False
+                    "priority_support": False,
+                    "max_agents": 2,
+                    "agents_note": "Escolha 2 agentes por análise"
                 }
             },
             {
@@ -57,7 +59,9 @@ async def get_plans():
                 "limits": {
                     "analyses_per_month": 50,
                     "export_formats": ["markdown", "pdf", "pptx"],
-                    "priority_support": True
+                    "priority_support": True,
+                    "max_agents": 5,
+                    "agents_note": "Todos os 5 agentes especializados"
                 }
             },
             {
@@ -78,7 +82,9 @@ async def get_plans():
                     "analyses_per_month": -1,
                     "export_formats": ["markdown", "pdf", "pptx", "xlsx"],
                     "priority_support": True,
-                    "api_access": True
+                    "api_access": True,
+                    "max_agents": 5,
+                    "agents_note": "Todos os 5 agentes especializados"
                 }
             }
         ]
@@ -97,6 +103,58 @@ async def get_billing_status(
     stats = billing_service.get_usage_stats(UUID(tenant.org_id))
     
     return BillingStatusResponse(**stats)
+
+
+@router.get("/agent-limits")
+async def get_agent_limits(
+    db: Session = Depends(get_db),
+    tenant: TenantContext = Depends(get_tenant_context)
+):
+    """
+    Retorna limites de agentes para o plano do usuário.
+    
+    Returns:
+        - max_agents: Número máximo de agentes que podem ser selecionados
+        - agents_allowed: Lista de agentes disponíveis para seleção
+        - plan: Plano atual (free, pro, enterprise)
+    """
+    billing_service = BillingService(db)
+    limits = billing_service.get_agent_limits(UUID(tenant.org_id))
+    
+    # Adiciona descrições dos agentes
+    agent_descriptions = {
+        "analyst": {
+            "id": "analyst",
+            "name": "Analista de Negócios",
+            "description": "Análise estratégica do problema e oportunidades",
+            "emoji": "📊"
+        },
+        "commercial": {
+            "id": "commercial",
+            "name": "Especialista Comercial",
+            "description": "Estratégias de vendas e relacionamento com clientes",
+            "emoji": "💼"
+        },
+        "financial": {
+            "id": "financial",
+            "name": "Especialista Financeiro",
+            "description": "Análise de custos, ROI e viabilidade financeira",
+            "emoji": "💰"
+        },
+        "market": {
+            "id": "market",
+            "name": "Especialista de Mercado",
+            "description": "Análise competitiva e tendências de mercado",
+            "emoji": "📈"
+        },
+    }
+    
+    return {
+        "max_agents": limits["max_agents"],
+        "plan": limits["plan"],
+        "agents": [agent_descriptions[a] for a in limits["agents_allowed"] if a in agent_descriptions],
+        "note": "O Revisor Executivo é incluído automaticamente para gerar o resumo."
+    }
 
 
 @router.post("/checkout/{plan}", response_model=CheckoutSessionResponse)

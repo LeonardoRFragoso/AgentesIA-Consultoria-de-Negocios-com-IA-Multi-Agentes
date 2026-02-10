@@ -33,6 +33,10 @@ class AsyncAnalysisCreate(BaseModel):
     business_type: str = Field(default="B2B")
     analysis_depth: str = Field(default="Padrão")
     use_cache: bool = Field(default=True, description="Usar cache para análises repetidas")
+    selected_agents: Optional[list] = Field(
+        default=None,
+        description="Agentes a usar (Free: escolhe 2, Pro/Enterprise: todos). Opções: analyst, commercial, financial, market"
+    )
 
 
 class AsyncAnalysisResponse(BaseModel):
@@ -90,12 +94,36 @@ async def create_async_analysis(
     Se análise similar já foi processada e use_cache=True,
     retorna resultado do cache instantaneamente.
     
+    **Agentes por plano:**
+    - Free: escolhe até 2 agentes (+ reviewer automático)
+    - Pro/Enterprise: todos os 5 agentes
+    
     Returns:
         - analysis_id: ID da análise no banco
         - task_id: ID da task na fila (para polling)
         - status: "pending" | "cached"
         - cached: Se veio do cache
     """
+    from database import get_db_session
+    from services.billing_service import BillingService
+    from uuid import UUID
+    
+    # Valida agentes selecionados baseado no plano
+    with get_db_session() as db:
+        billing = BillingService(db)
+        selected = data.selected_agents or ["analyst", "commercial"]  # Default para Free
+        
+        valid, error_msg, agents_to_use = billing.validate_agents(
+            UUID(tenant.org_id), 
+            selected
+        )
+        
+        if not valid:
+            raise HTTPException(
+                status_code=status.HTTP_402_PAYMENT_REQUIRED,
+                detail=error_msg
+            )
+    
     service = AsyncAnalysisService(tenant.org_id, tenant.user_id)
     
     result = service.create_analysis(
@@ -103,6 +131,7 @@ async def create_async_analysis(
         business_type=data.business_type,
         analysis_depth=data.analysis_depth,
         use_cache=data.use_cache,
+        selected_agents=agents_to_use,
     )
     
     if result["cached"]:
