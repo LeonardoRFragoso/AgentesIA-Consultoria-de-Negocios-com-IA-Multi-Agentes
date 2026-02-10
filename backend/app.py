@@ -192,11 +192,22 @@ async def global_exception_handler(request: Request, exc: Exception):
     """Handler global para exceções não tratadas."""
     logger.error(f"Unhandled exception: {exc}", exc_info=True)
     
+    # Headers CORS para garantir que erros também tenham headers corretos
+    origin = request.headers.get("origin", "")
+    cors_headers = {}
+    allowed_origins = get_cors_origins()
+    if origin in allowed_origins:
+        cors_headers = {
+            "Access-Control-Allow-Origin": origin,
+            "Access-Control-Allow-Credentials": "true",
+        }
+    
     # Em produção, não expor detalhes do erro
     if settings.is_production():
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"detail": "Internal server error"}
+            content={"detail": "Internal server error"},
+            headers=cors_headers
         )
     
     return JSONResponse(
@@ -204,7 +215,8 @@ async def global_exception_handler(request: Request, exc: Exception):
         content={
             "detail": str(exc),
             "type": type(exc).__name__
-        }
+        },
+        headers=cors_headers
     )
 
 
