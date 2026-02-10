@@ -116,13 +116,18 @@ def get_cors_origins():
     """Retorna origens CORS validadas - NUNCA permite wildcard."""
     origins = settings.CORS_ORIGINS
     
+    # DEBUG: Log das origens configuradas
+    logger.info(f"CORS_ORIGINS configured: {origins}")
+    
     # CRÍTICO: Bloqueia wildcard em produção
     if settings.is_production():
         if "*" in origins:
             logger.error("SECURITY: Wildcard CORS não permitido em produção!")
             origins = []  # Bloqueia tudo se mal configurado
     
-    return [o for o in origins if o != "*"]
+    final_origins = [o for o in origins if o != "*"]
+    logger.info(f"CORS_ORIGINS final: {final_origins}")
+    return final_origins
 
 app.add_middleware(
     CORSMiddleware,
