@@ -186,6 +186,196 @@ async def get_task_status(
     )
 
 
+# =============================================================================
+# REFINE ENDPOINT (must come before /{analysis_id} to match correctly)
+# =============================================================================
+
+class RefineRequest(BaseModel):
+    """Request para refinar análise."""
+    analysis_id: str
+    message: str
+    context: dict = {}
+
+
+@router.post("/refine")
+async def refine_analysis(
+    request: RefineRequest,
+    tenant: TenantContext = Depends(get_tenant_context)
+):
+    """
+    Refina análise com perguntas de follow-up.
+    
+    Limites por plano:
+    - Free: 3 perguntas por análise
+    - Pro: 20 perguntas por análise
+    - Enterprise: Ilimitado
+    """
+    import os
+    
+    service = AsyncAnalysisService(tenant.org_id, tenant.user_id)
+    analysis = service.get_analysis(request.analysis_id)
+    
+    if not analysis:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Análise não encontrada"
+        )
+    
+    # TODO: Implementar verificação de limite de refino por plano
+    # Por ora, permite refino sem limite
+    
+    try:
+        import anthropic
+        
+        api_key = os.getenv("ANTHROPIC_API_KEY")
+        if not api_key:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="API key não configurada"
+            )
+        
+        client = anthropic.Anthropic(api_key=api_key)
+        
+        # Monta contexto da análise anterior
+        context_text = ""
+        if analysis.get("results"):
+            for agent, content in analysis["results"].items():
+                if content:
+                    context_text += f"\n\n### {agent.upper()}:\n{content}"
+        
+        if analysis.get("executive_summary"):
+            context_text += f"\n\n### SUMÁRIO EXECUTIVO:\n{analysis['executive_summary']}"
+        
+        # Chama API
+        message = client.messages.create(
+            model="claude-sonnet-4-20250514",
+            max_tokens=2000,
+            messages=[
+                {
+                    "role": "user",
+                    "content": f"""Com base na análise anterior, responda à seguinte pergunta de follow-up.
+
+CONTEXTO DA ANÁLISE:
+{context_text}
+
+PERGUNTA DO USUÁRIO:
+{request.message}
+
+Responda de forma clara, objetiva e acionável."""
+                }
+            ]
+        )
+        
+        response_text = message.content[0].text if message.content else "Não foi possível gerar resposta."
+        
+        return {
+            "response": response_text,
+            "usage": {
+                "used": 1,
+                "limit": 3,  # TODO: buscar do plano
+                "remaining": 2
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Erro ao processar pergunta: {str(e)}"
+        )
+
+
+# =============================================================================
+# EXPORT ENDPOINT (must come before /{analysis_id} to match correctly)
+# =============================================================================
+
+@router.get("/{analysis_id}/export/{format}")
+async def export_analysis(
+    analysis_id: str,
+    format: str,
+    tenant: TenantContext = Depends(get_tenant_context)
+):
+    """
+    Exporta análise em formato específico.
+    
+    Formatos disponíveis por plano:
+    - Free: markdown
+    - Pro: markdown, pdf, pptx
+    - Enterprise: markdown, pdf, pptx, xlsx, docx
+    """
+    from database import get_db_session
+    from services.billing_service import BillingService
+    from uuid import UUID
+    
+    # Verifica permissão de export
+    with get_db_session() as db:
+        billing_service = BillingService(db)
+        can_export, error_msg = billing_service.check_can_export(UUID(tenant.org_id))
+        
+        if not can_export:
+            raise HTTPException(
+                status_code=status.HTTP_402_PAYMENT_REQUIRED,
+                detail=error_msg
+            )
+    
+    # Busca análise
+    service = AsyncAnalysisService(tenant.org_id, tenant.user_id)
+    analysis = service.get_analysis(analysis_id)
+    
+    if not analysis:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Análise não encontrada"
+        )
+    
+    # Importa exporters
+    from services.exporter import AnalysisExporter
+    from fastapi.responses import Response
+    
+    analysis_data = {
+        "problem_description": analysis.get("problem_description", ""),
+        "executive_summary": analysis.get("executive_summary", ""),
+        "results": analysis.get("results", {}),
+    }
+    
+    if format == "markdown":
+        content = AnalysisExporter.to_markdown(analysis_data)
+        return Response(
+            content=content,
+            media_type="text/markdown",
+            headers={"Content-Disposition": f"attachment; filename=analise-{analysis_id}.md"}
+        )
+    
+    elif format == "pdf":
+        content = AnalysisExporter.to_pdf(analysis_data, "temp.pdf")
+        return Response(
+            content=content,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename=analise-{analysis_id}.pdf"}
+        )
+    
+    elif format == "pptx":
+        content = AnalysisExporter.to_ppt(analysis_data, "temp.pptx")
+        return Response(
+            content=content,
+            media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+            headers={"Content-Disposition": f"attachment; filename=analise-{analysis_id}.pptx"}
+        )
+    
+    elif format == "docx":
+        content = AnalysisExporter.to_docx(analysis_data, "temp.docx")
+        return Response(
+            content=content,
+            media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            headers={"Content-Disposition": f"attachment; filename=analise-{analysis_id}.docx"}
+        )
+    
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Formato não suportado: {format}"
+        )
+
+
 @router.get("/{analysis_id}", response_model=AnalysisDetailResponse)
 async def get_analysis(
     analysis_id: str,
@@ -296,193 +486,3 @@ async def get_queue_stats(
         return queue.get_queue_stats()
     
     return {"message": "Queue stats not available"}
-
-
-# =============================================================================
-# REFINE ENDPOINT
-# =============================================================================
-
-class RefineRequest(BaseModel):
-    """Request para refinar análise."""
-    analysis_id: str
-    message: str
-    context: dict = {}
-
-
-@router.post("/refine")
-async def refine_analysis(
-    request: RefineRequest,
-    tenant: TenantContext = Depends(get_tenant_context)
-):
-    """
-    Refina análise com perguntas de follow-up.
-    
-    Limites por plano:
-    - Free: 3 perguntas por análise
-    - Pro: 20 perguntas por análise
-    - Enterprise: Ilimitado
-    """
-    import os
-    
-    service = AsyncAnalysisService(tenant.org_id, tenant.user_id)
-    analysis = service.get_analysis(request.analysis_id)
-    
-    if not analysis:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Análise não encontrada"
-        )
-    
-    # TODO: Implementar verificação de limite de refino por plano
-    # Por ora, permite refino sem limite
-    
-    try:
-        import anthropic
-        
-        api_key = os.getenv("ANTHROPIC_API_KEY")
-        if not api_key:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="API key não configurada"
-            )
-        
-        client = anthropic.Anthropic(api_key=api_key)
-        
-        # Monta contexto da análise anterior
-        context_text = ""
-        if analysis.get("results"):
-            for agent, content in analysis["results"].items():
-                if content:
-                    context_text += f"\n\n### {agent.upper()}:\n{content}"
-        
-        if analysis.get("executive_summary"):
-            context_text += f"\n\n### SUMÁRIO EXECUTIVO:\n{analysis['executive_summary']}"
-        
-        # Chama API
-        message = client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=2000,
-            messages=[
-                {
-                    "role": "user",
-                    "content": f"""Com base na análise anterior, responda à seguinte pergunta de follow-up.
-
-CONTEXTO DA ANÁLISE:
-{context_text}
-
-PERGUNTA DO USUÁRIO:
-{request.message}
-
-Responda de forma clara, objetiva e acionável."""
-                }
-            ]
-        )
-        
-        response_text = message.content[0].text if message.content else "Não foi possível gerar resposta."
-        
-        return {
-            "response": response_text,
-            "usage": {
-                "used": 1,
-                "limit": 3,  # TODO: buscar do plano
-                "remaining": 2
-            }
-        }
-        
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Erro ao processar pergunta: {str(e)}"
-        )
-
-
-# =============================================================================
-# EXPORT ENDPOINT
-# =============================================================================
-
-@router.get("/{analysis_id}/export/{format}")
-async def export_analysis(
-    analysis_id: str,
-    format: str,
-    tenant: TenantContext = Depends(get_tenant_context)
-):
-    """
-    Exporta análise em formato específico.
-    
-    Formatos disponíveis por plano:
-    - Free: markdown
-    - Pro: markdown, pdf, pptx
-    - Enterprise: markdown, pdf, pptx, xlsx, docx
-    """
-    from database import get_db_session
-    from services.billing_service import BillingService
-    from uuid import UUID
-    
-    # Verifica permissão de export
-    with get_db_session() as db:
-        billing_service = BillingService(db)
-        can_export, error_msg = billing_service.check_can_export(UUID(tenant.org_id))
-        
-        if not can_export:
-            raise HTTPException(
-                status_code=status.HTTP_402_PAYMENT_REQUIRED,
-                detail=error_msg
-            )
-    
-    # Busca análise
-    service = AsyncAnalysisService(tenant.org_id, tenant.user_id)
-    analysis = service.get_analysis(analysis_id)
-    
-    if not analysis:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Análise não encontrada"
-        )
-    
-    # Importa exporters
-    from services.exporter import AnalysisExporter
-    from fastapi.responses import Response
-    
-    analysis_data = {
-        "problem_description": analysis.get("problem_description", ""),
-        "executive_summary": analysis.get("executive_summary", ""),
-        "results": analysis.get("results", {}),
-    }
-    
-    if format == "markdown":
-        content = AnalysisExporter.to_markdown(analysis_data)
-        return Response(
-            content=content,
-            media_type="text/markdown",
-            headers={"Content-Disposition": f"attachment; filename=analise-{analysis_id}.md"}
-        )
-    
-    elif format == "pdf":
-        content = AnalysisExporter.to_pdf(analysis_data, "temp.pdf")
-        return Response(
-            content=content,
-            media_type="application/pdf",
-            headers={"Content-Disposition": f"attachment; filename=analise-{analysis_id}.pdf"}
-        )
-    
-    elif format == "pptx":
-        content = AnalysisExporter.to_ppt(analysis_data, "temp.pptx")
-        return Response(
-            content=content,
-            media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
-            headers={"Content-Disposition": f"attachment; filename=analise-{analysis_id}.pptx"}
-        )
-    
-    elif format == "docx":
-        content = AnalysisExporter.to_docx(analysis_data, "temp.docx")
-        return Response(
-            content=content,
-            media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            headers={"Content-Disposition": f"attachment; filename=analise-{analysis_id}.docx"}
-        )
-    
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Formato não suportado: {format}"
-        )
