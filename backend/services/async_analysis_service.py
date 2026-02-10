@@ -16,10 +16,10 @@ from datetime import datetime
 from typing import Optional, Dict, Any
 from uuid import UUID
 
-from ..database import tenant_session, Analysis, AgentOutput
-from ..database.models import AnalysisStatus
-from ..infrastructure.cache import get_cache, CacheKeys
-from ..infrastructure.queue import get_queue, TaskTypes, TaskStatus, TaskResult
+from database import tenant_session, Analysis, AgentOutput
+from database.models import AnalysisStatus
+from infrastructure.cache import get_cache, CacheKeys
+from infrastructure.queue import get_queue, TaskTypes, TaskStatus, TaskResult
 
 logger = logging.getLogger(__name__)
 
@@ -286,8 +286,8 @@ async def handle_analysis_task(payload: Dict[str, Any]) -> Dict[str, Any]:
     Handler para task de análise.
     Executado pelo worker em background.
     """
-    from ..database import get_db_session
-    from ..database.models import AnalysisStatus
+    from database import get_db_session
+    from database.models import AnalysisStatus
     
     analysis_id = payload["analysis_id"]
     

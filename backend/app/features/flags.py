@@ -5,7 +5,7 @@ from enum import Enum
 from dataclasses import dataclass, field
 from typing import Optional, Union
 
-from ..billing.plans import PlanTier
+from app.billing.plans import PlanTier
 
 
 class Feature(str, Enum):

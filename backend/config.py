@@ -4,9 +4,10 @@ Todas as configurações sensíveis vêm de variáveis de ambiente.
 """
 
 import os
+import json
 from functools import lru_cache
 from typing import List, Optional
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings
 
 
@@ -47,6 +48,18 @@ class Settings(BaseSettings):
         description="Lista de origens permitidas. Em produção: seu domínio real"
     )
     CORS_ALLOW_CREDENTIALS: bool = True
+    
+    @field_validator('CORS_ORIGINS', mode='before')
+    @classmethod
+    def parse_cors_origins(cls, v):
+        """Parse CORS_ORIGINS se vir como string JSON."""
+        if isinstance(v, str):
+            try:
+                return json.loads(v)
+            except (json.JSONDecodeError, TypeError):
+                # Se não for JSON válido, trata como lista com um item
+                return [v]
+        return v
     
     # ==========================================================================
     # DATABASE

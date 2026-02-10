@@ -5,11 +5,11 @@ Authentication endpoints.
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 
-from ..database import get_db
-from ..security import JWTHandler, get_current_user
-from ..security.auth import get_jwt_handler, TokenPayload
-from ..services.user_service import UserService
-from .schemas import (
+from database import get_db
+from security import JWTHandler, get_current_user
+from security.auth import get_jwt_handler, TokenPayload
+from services.user_service import UserService
+from api.schemas import (
     UserRegister, UserLogin, TokenResponse, 
     RefreshTokenRequest, UserResponse
 )

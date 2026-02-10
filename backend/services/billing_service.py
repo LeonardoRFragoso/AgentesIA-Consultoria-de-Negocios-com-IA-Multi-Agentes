@@ -7,7 +7,7 @@ from typing import Optional, Tuple
 from uuid import UUID
 from sqlalchemy.orm import Session
 
-from ..database.models import Organization, PlanType, Analysis
+from database.models import Organization, PlanType, Analysis
 
 
 class BillingService:

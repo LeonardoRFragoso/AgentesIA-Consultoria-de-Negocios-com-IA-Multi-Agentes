@@ -358,7 +358,7 @@ def get_cache() -> RedisCache:
     global _cache
     
     if _cache is None:
-        from ..config import get_settings
+        from config import get_settings
         settings = get_settings()
         _cache = RedisCache(settings.REDIS_URL if hasattr(settings, 'REDIS_URL') else None)
     

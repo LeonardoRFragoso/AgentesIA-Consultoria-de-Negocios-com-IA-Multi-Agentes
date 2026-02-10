@@ -6,11 +6,11 @@ from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 from uuid import UUID
 
-from ..database import get_db
-from ..security.auth import get_tenant_context, TenantContext
-from ..services.billing_service import BillingService
-from ..config import get_settings
-from .schemas import BillingStatusResponse, CheckoutSessionResponse
+from database import get_db
+from security.auth import get_tenant_context, TenantContext
+from services.billing_service import BillingService
+from config import get_settings
+from api.schemas import BillingStatusResponse, CheckoutSessionResponse
 
 router = APIRouter(prefix="/billing", tags=["Billing"])
 
@@ -138,7 +138,7 @@ async def stripe_webhook(
             org_id = session.metadata.get("org_id")
             
             if org_id:
-                from ..database.models import PlanType
+                from database.models import PlanType
                 # Determina plano pelo price
                 # TODO: Mapear price_id para plano
                 billing_service.upgrade_plan(UUID(org_id), PlanType.PRO)
@@ -190,7 +190,7 @@ async def get_billing_portal(
         stripe.api_key = settings.STRIPE_SECRET_KEY
         
         # Busca customer_id da organização
-        from ..services.user_service import UserService
+        from services.user_service import UserService
         user_service = UserService(db)
         org = user_service.get_organization(UUID(tenant.org_id))
         

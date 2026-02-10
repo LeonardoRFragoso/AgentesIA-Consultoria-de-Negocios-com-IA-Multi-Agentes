@@ -2,8 +2,8 @@
 Feature Exceptions - Erros claros para features bloqueadas
 """
 from typing import Optional
-from ..billing.plans import PlanTier
-from .flags import Feature
+from app.billing.plans import PlanTier
+from app.features.flags import Feature
 
 
 class FeatureError(Exception):

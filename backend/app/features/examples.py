@@ -5,17 +5,17 @@ Este arquivo demonstra como usar o sistema de feature flags em diferentes cenár
 """
 from fastapi import APIRouter, Depends, HTTPException
 
-from ..billing.plans import PlanTier
-from .flags import Feature, is_feature_enabled, get_feature_limit
-from .exceptions import FeatureNotAvailableError, FeatureLimitExceededError
-from .middleware import (
+from app.billing.plans import PlanTier
+from app.features.flags import Feature, is_feature_enabled, get_feature_limit
+from app.features.exceptions import FeatureNotAvailableError, FeatureLimitExceededError
+from app.features.middleware import (
     FeatureGate,
     get_feature_gate,
     require_feature,
     require_plan,
     check_usage_limit,
 )
-from .service import FeatureService, get_feature_service
+from app.features.service import FeatureService, get_feature_service
 
 router = APIRouter(prefix="/examples", tags=["examples"])
 

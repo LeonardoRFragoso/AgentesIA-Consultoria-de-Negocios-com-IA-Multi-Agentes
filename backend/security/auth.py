@@ -3,12 +3,20 @@ Middlewares e dependencies de autenticação para FastAPI.
 """
 
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthCredentials
+from fastapi.security import HTTPBearer
+from pydantic import BaseModel
 from functools import wraps
 from typing import Optional, List
 
-from .jwt_handler import JWTHandler, TokenPayload
-from ..config import get_settings
+from security.jwt_handler import JWTHandler, TokenPayload
+from config import get_settings
+
+
+class HTTPAuthCredentials(BaseModel):
+    """HTTP Authentication Credentials model."""
+    scheme: str
+    credentials: str
+
 
 # Security scheme
 security = HTTPBearer()

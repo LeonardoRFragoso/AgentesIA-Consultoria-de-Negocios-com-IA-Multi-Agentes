@@ -7,17 +7,17 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
-from ..billing.plans import PlanTier
-from .flags import Feature, get_all_features_status
-from .service import FeatureService, get_feature_service
-from .middleware import (
+from app.billing.plans import PlanTier
+from app.features.flags import Feature, get_all_features_status
+from app.features.service import FeatureService, get_feature_service
+from app.features.middleware import (
     FeatureGate,
     get_feature_gate,
     require_feature,
     require_plan,
     check_usage_limit,
 )
-from .exceptions import FeatureError, get_status_code_for_error
+from app.features.exceptions import FeatureError, get_status_code_for_error
 
 logger = logging.getLogger(__name__)
 

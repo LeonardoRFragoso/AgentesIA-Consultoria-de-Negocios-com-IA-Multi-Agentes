@@ -5,8 +5,8 @@ import logging
 from typing import Optional, Union
 from datetime import datetime
 
-from ..billing.plans import PlanTier, get_plan
-from .flags import (
+from app.billing.plans import PlanTier, get_plan
+from app.features.flags import (
     Feature,
     FeatureFlag,
     FEATURES,
@@ -16,7 +16,7 @@ from .flags import (
     get_feature_limit,
     get_all_features_status,
 )
-from .exceptions import (
+from app.features.exceptions import (
     FeatureNotAvailableError,
     FeatureLimitExceededError,
     UpgradeRequiredError,

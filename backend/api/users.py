@@ -7,11 +7,11 @@ from sqlalchemy.orm import Session
 from uuid import UUID
 from typing import List
 
-from ..database import get_db
-from ..database.models import User, UserRole
-from ..security.auth import get_tenant_context, TenantContext
-from ..services.user_service import UserService
-from .schemas import UserResponse, UserInvite
+from database import get_db
+from database.models import User, UserRole
+from security.auth import get_tenant_context, TenantContext
+from services.user_service import UserService
+from api.schemas import UserResponse, UserInvite
 
 router = APIRouter(prefix="/users", tags=["Users"])
 

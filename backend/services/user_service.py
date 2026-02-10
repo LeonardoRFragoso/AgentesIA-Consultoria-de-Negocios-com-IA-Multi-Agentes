@@ -7,8 +7,8 @@ from typing import Optional, Tuple
 from uuid import UUID
 from sqlalchemy.orm import Session
 
-from ..database.models import User, Organization, PlanType, UserRole
-from ..security.password import hash_password, verify_password
+from database.models import User, Organization, PlanType, UserRole
+from security.password import hash_password, verify_password
 
 
 class UserService:

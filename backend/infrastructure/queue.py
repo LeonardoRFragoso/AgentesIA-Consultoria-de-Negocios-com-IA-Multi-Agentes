@@ -282,6 +282,9 @@ class RedisQueue(TaskQueue):
     
     def _worker_loop(self):
         """Loop principal do worker."""
+        from config import get_settings
+        settings = get_settings()
+        
         while self._running:
             try:
                 # Blocking pop com timeout
@@ -290,7 +293,11 @@ class RedisQueue(TaskQueue):
                     _, task_id = result
                     self._executor.submit(self._process_task, task_id)
             except Exception as e:
-                logger.error(f"Worker error: {e}")
+                # Apenas log em produção - em dev, Redis é opcional
+                if settings.is_production():
+                    logger.error(f"Worker error: {e}")
+                else:
+                    logger.debug(f"Worker error (development - Redis optional): {e}")
     
     def _process_task(self, task_id: str):
         """Processa uma task."""

@@ -7,12 +7,12 @@ from sqlalchemy.orm import Session
 from typing import Optional
 from uuid import UUID
 
-from ..database import get_db
-from ..security.auth import get_tenant_context, TenantContext
-from ..services.analysis_service import AnalysisService
-from ..services.billing_service import BillingService
-from ..middleware.rate_limiter import get_rate_limiter
-from .schemas import (
+from database import get_db
+from security.auth import get_tenant_context, TenantContext
+from services.analysis_service import AnalysisService
+from services.billing_service import BillingService
+from middleware.rate_limiter import get_rate_limiter
+from api.schemas import (
     AnalysisCreate, AnalysisResponse, AnalysisDetailResponse,
     AnalysisListResponse
 )
@@ -100,7 +100,7 @@ def run_analysis_background(analysis_id: str, db: Session):
     
     NOTA: Em produção, usar Celery com Redis como broker.
     """
-    from ..database.connection import get_db_session
+    from database.connection import get_db_session
     
     with get_db_session() as session:
         analysis_service = AnalysisService(session)
@@ -122,7 +122,7 @@ async def list_analyses(
     """
     Lista análises da organização com paginação.
     """
-    from ..database.models import AnalysisStatus
+    from database.models import AnalysisStatus
     
     analysis_service = AnalysisService(db)
     

@@ -174,7 +174,7 @@ def get_rate_limiter() -> RateLimiter:
         # Tenta conectar ao Redis
         try:
             import redis
-            from ..config import get_settings
+            from config import get_settings
             
             settings = get_settings()
             client = redis.from_url(settings.REDIS_URL)

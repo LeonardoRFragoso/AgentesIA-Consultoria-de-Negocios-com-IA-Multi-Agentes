@@ -17,8 +17,8 @@ from pydantic import BaseModel, Field
 from typing import Optional, Dict, Any
 from datetime import datetime
 
-from ..security.auth import get_tenant_context, TenantContext
-from ..services.async_analysis_service import AsyncAnalysisService
+from security.auth import get_tenant_context, TenantContext
+from services.async_analysis_service import AsyncAnalysisService
 
 router = APIRouter(prefix="/analyses", tags=["Async Analyses"])
 
@@ -240,7 +240,7 @@ async def get_cache_stats(
     if not tenant.is_admin():
         raise HTTPException(status_code=403, detail="Admin required")
     
-    from ..infrastructure.cache import get_cache
+    from infrastructure.cache import get_cache
     cache = get_cache()
     
     return cache.health_check()
@@ -260,7 +260,7 @@ async def get_queue_stats(
     if not tenant.is_admin():
         raise HTTPException(status_code=403, detail="Admin required")
     
-    from ..infrastructure.queue import get_queue
+    from infrastructure.queue import get_queue
     queue = get_queue()
     
     if hasattr(queue, 'get_queue_stats'):

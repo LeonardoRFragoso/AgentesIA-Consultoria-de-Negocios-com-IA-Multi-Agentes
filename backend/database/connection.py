@@ -17,8 +17,8 @@ from sqlalchemy.pool import QueuePool, StaticPool, NullPool
 from sqlalchemy.engine import Engine
 import logging
 
-from .models import Base
-from ..config import get_settings
+from database.models import Base
+from config import get_settings
 
 logger = logging.getLogger(__name__)
 

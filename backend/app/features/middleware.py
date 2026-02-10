@@ -8,9 +8,9 @@ from typing import Callable, Optional, Union, Any
 from fastapi import Request, HTTPException, Depends
 from fastapi.responses import JSONResponse
 
-from ..billing.plans import PlanTier
-from .flags import Feature, get_feature, is_feature_enabled, get_feature_limit, FEATURES
-from .exceptions import (
+from app.billing.plans import PlanTier
+from app.features.flags import Feature, get_feature, is_feature_enabled, get_feature_limit, FEATURES
+from app.features.exceptions import (
     FeatureNotAvailableError,
     FeatureLimitExceededError,
     UpgradeRequiredError,
