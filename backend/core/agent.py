@@ -14,7 +14,7 @@ load_dotenv(Path(__file__).parent.parent.parent / ".env")
 
 from .types import ExecutionContext, AgentMetadata, ExecutionStatus
 from .exceptions import PromptLoadError, AgentExecutionError, TimeoutError as TeamTimeoutError
-from streamlit_infrastructure.logging import get_logger
+from infrastructure.logging import get_logger
 
 logger = get_logger(__name__)
 

@@ -7,7 +7,7 @@ from core.conflict_model import (
     Conflict, ConflictSeverity, ConsensusResult, DebateRound, AgentPosition
 )
 from core.types import ExecutionContext
-from streamlit_infrastructure.logging import get_logger
+from infrastructure.logging import get_logger
 from datetime import datetime
 
 logger = get_logger(__name__)

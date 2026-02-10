@@ -268,7 +268,7 @@ async def export_analysis(
         )
     
     # Importa exporters
-    from streamlit_infrastructure.exporters.analysis_exporter import AnalysisExporter
+    from services.exporter import AnalysisExporter
     from fastapi.responses import Response
     
     analysis_data = {

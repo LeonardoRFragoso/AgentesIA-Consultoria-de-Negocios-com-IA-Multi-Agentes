@@ -8,7 +8,7 @@ from core.conflict_model import (
     Conflict, ConflictReport, ConflictType, ConflictSeverity,
     AgentPosition
 )
-from streamlit_infrastructure.logging import get_logger
+from infrastructure.logging import get_logger
 import uuid
 from datetime import datetime
 

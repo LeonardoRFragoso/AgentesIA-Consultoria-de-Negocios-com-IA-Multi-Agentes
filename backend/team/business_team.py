@@ -11,7 +11,7 @@ from agents import (
 
 
 class BusinessTeam:
-    """Wrapper para compatibilidade com Streamlit (síncrono)"""
+    """Wrapper síncrono para orquestração de agentes de negócio"""
     
     def __init__(self):
         self.problem_description = None
@@ -68,7 +68,7 @@ class BusinessTeam:
                 future = executor.submit(asyncio.run, self.orchestrator.execute(self.context))
                 result_context = future.result()
         else:
-            # Caso normal (Streamlit, scripts)
+            # Caso normal (scripts standalone)
             result_context = asyncio.run(self.orchestrator.execute(self.context))
         
         print("✅ Análise concluída!")

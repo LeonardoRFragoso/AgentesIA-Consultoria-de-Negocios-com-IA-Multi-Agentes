@@ -12,7 +12,7 @@ from core.meeting_model import (
     MeetingMinutes, ExecutiveParticipant, ExecutiveRole, MeetingPhase,
     MeetingAgendaItem, MeetingStatement, MeetingDecision
 )
-from streamlit_infrastructure.logging import get_logger
+from infrastructure.logging import get_logger
 
 logger = get_logger(__name__)
 
