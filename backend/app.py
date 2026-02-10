@@ -19,12 +19,12 @@ from fastapi.exceptions import RequestValidationError
 import logging
 import platform
 
-from .config import get_settings
-from .database import init_db
-from .api import auth_router, analyses_router, async_analyses_router, billing_router, users_router
-from .api.schemas import HealthResponse
-from .middleware.security import SecurityMiddleware, SecurityConfig
-from .infrastructure.observability import (
+from config import get_settings
+from database import init_db
+from api import auth_router, analyses_router, async_analyses_router, billing_router, users_router
+from api.schemas import HealthResponse
+from middleware.security import SecurityMiddleware, SecurityConfig
+from infrastructure.observability import (
     setup_logging,
     get_logger,
     get_metrics,
@@ -53,14 +53,14 @@ async def lifespan(app: FastAPI):
     logger.info(f"Database initialized: {settings.DATABASE_URL.split('@')[-1]}")
     
     # Inicializa Cache (Redis ou memória)
-    from .infrastructure.cache import init_cache
+    from infrastructure.cache import init_cache
     redis_url = getattr(settings, 'REDIS_URL', None)
     cache = init_cache(redis_url)
     logger.info(f"Cache initialized: {'Redis' if cache.is_redis_available else 'Memory'}")
     
     # Inicializa Fila de Tasks
-    from .infrastructure.queue import init_queue
-    from .services.async_analysis_service import register_task_handlers
+    from infrastructure.queue import init_queue
+    from services.async_analysis_service import register_task_handlers
     queue = init_queue(redis_url, start_worker=True)
     register_task_handlers()
     logger.info("Task queue initialized")
@@ -81,7 +81,7 @@ async def lifespan(app: FastAPI):
     
     # Shutdown
     logger.info("Shutting down application...")
-    from .database.connection import close_db
+    from database.connection import close_db
     close_db()
 
 
@@ -216,16 +216,17 @@ async def health_check():
     
     # Verifica database
     try:
-        from .database import get_db_session
+        from database import get_db_session
+        from sqlalchemy import text
         with get_db_session() as db:
-            db.execute("SELECT 1")
+            db.execute(text("SELECT 1"))
             checks["database"] = "healthy"
     except Exception as e:
         checks["database"] = f"unhealthy: {str(e)[:50]}"
     
     # Verifica Redis (se configurado)
     try:
-        from .middleware.security import get_advanced_rate_limiter
+        from middleware.security import get_advanced_rate_limiter
         limiter = get_advanced_rate_limiter()
         if limiter:
             checks["cache"] = "healthy (memory)" 
@@ -261,7 +262,7 @@ async def liveness_check():
 async def readiness_check():
     """Readiness probe - verifica se app está pronta para receber tráfego."""
     try:
-        from .database import get_db_session
+        from database import get_db_session
         with get_db_session() as db:
             db.execute("SELECT 1")
         return {"status": "ready"}
@@ -328,7 +329,7 @@ if __name__ == "__main__":
     import uvicorn
     
     uvicorn.run(
-        "backend.app:app",
+        "app:app",
         host="0.0.0.0",
         port=8000,
         reload=settings.is_development(),
