@@ -38,13 +38,17 @@ class BusinessTeam:
     def _create_orchestrator(self) -> BusinessOrchestrator:
         """Cria orquestrador apenas com agentes selecionados"""
         agents = {}
-        for agent_name in self.selected_agents:
+        
+        # Agentes de análise (excluindo reviewer)
+        analysis_agents = [a for a in self.selected_agents if a != "reviewer"]
+        
+        for agent_name in analysis_agents:
             if agent_name in self.AGENT_CLASSES:
                 agents[agent_name] = self.AGENT_CLASSES[agent_name]()
         
-        # Sempre inclui reviewer se não estiver presente (para resumo executivo)
-        if "reviewer" not in agents:
-            agents["reviewer"] = ReviewerAgent()
+        # Sempre inclui reviewer com dependências corretas
+        # Passa os agentes disponíveis para que ele saiba quais dependências usar
+        agents["reviewer"] = ReviewerAgent(available_agents=analysis_agents)
         
         return BusinessOrchestrator(agents)
     
