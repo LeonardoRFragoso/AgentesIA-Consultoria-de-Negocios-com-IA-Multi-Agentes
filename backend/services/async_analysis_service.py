@@ -312,7 +312,7 @@ async def handle_analysis_task(payload: Dict[str, Any]) -> Dict[str, Any]:
         from team.business_team import BusinessTeam
         
         selected_agents = payload.get("selected_agents", ["analyst", "commercial"])
-        logger.info(f"Executando análise com agentes: {selected_agents}")
+        print(f"[DEBUG] Executando análise com agentes: {selected_agents}")
         team = BusinessTeam(selected_agents=selected_agents)
         results = team.analyze_business_scenario(
             problem_description=payload["problem_description"],
