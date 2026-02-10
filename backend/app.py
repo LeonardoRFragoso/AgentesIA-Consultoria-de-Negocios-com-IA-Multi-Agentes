@@ -114,7 +114,17 @@ app.add_middleware(SecurityMiddleware, config=SecurityConfig())
 # Agora: apenas origens explícitas são permitidas
 def get_cors_origins():
     """Retorna origens CORS validadas - NUNCA permite wildcard."""
-    origins = settings.CORS_ORIGINS
+    origins = list(settings.CORS_ORIGINS) if settings.CORS_ORIGINS else []
+    
+    # Domínios conhecidos que devem sempre ser permitidos em produção
+    KNOWN_PRODUCTION_ORIGINS = [
+        "https://agentes-ia-consultoria-de-negocios.vercel.app",
+    ]
+    
+    # Adiciona domínios conhecidos se não estiverem na lista
+    for known_origin in KNOWN_PRODUCTION_ORIGINS:
+        if known_origin not in origins:
+            origins.append(known_origin)
     
     # DEBUG: Log das origens configuradas
     logger.info(f"CORS_ORIGINS configured: {origins}")
@@ -123,7 +133,7 @@ def get_cors_origins():
     if settings.is_production():
         if "*" in origins:
             logger.error("SECURITY: Wildcard CORS não permitido em produção!")
-            origins = []  # Bloqueia tudo se mal configurado
+            origins = [o for o in origins if o != "*"]
     
     final_origins = [o for o in origins if o != "*"]
     logger.info(f"CORS_ORIGINS final: {final_origins}")
