@@ -371,6 +371,11 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         start_time = time.time()
         client_ip = self._get_client_ip(request)
         
+        # 0. Skip security checks for CORS preflight (OPTIONS) requests
+        if request.method == "OPTIONS":
+            response = await call_next(request)
+            return response
+        
         # 1. Verifica IP bloqueado
         if self._is_ip_blocked(client_ip):
             return self._blocked_response("IP blocked")
