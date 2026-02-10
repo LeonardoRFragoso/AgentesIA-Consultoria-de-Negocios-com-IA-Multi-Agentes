@@ -55,13 +55,7 @@ class DebateEngine:
         Returns:
             ConsensusResult com decisão final
         """
-        logger.info(
-            event="debate_started",
-            message=f"Starting debate for conflict: {conflict.topic}",
-            execution_id=context.execution_id,
-            conflict_id=conflict.conflict_id,
-            agents=conflict.agents_involved
-        )
+        print(f"[DEBATE] Starting debate for conflict: {conflict.topic}")
         
         # Inicializa resultado
         result = ConsensusResult(
@@ -79,13 +73,7 @@ class DebateEngine:
         
         # Executa rounds de debate
         for round_num in range(1, self.MAX_ROUNDS + 1):
-            logger.debug(
-                event="debate_round_start",
-                message=f"Starting debate round {round_num}",
-                execution_id=context.execution_id,
-                conflict_id=conflict.conflict_id,
-                round=round_num
-            )
+            print(f"[DEBATE] Round {round_num} started")
             
             # Coleta argumentos
             arguments = self._collect_arguments(
@@ -105,12 +93,7 @@ class DebateEngine:
             # Avalia convergência
             convergence = self._assess_convergence(conflict, arguments)
             
-            logger.debug(
-                event="debate_round_convergence",
-                message=f"Round {round_num} convergence: {convergence:.2f}",
-                execution_id=context.execution_id,
-                convergence=convergence
-            )
+            print(f"[DEBATE] Round {round_num} convergence: {convergence:.2f}")
             
             # Se convergiu, encerra debate
             if convergence >= 0.7 or round_num == self.MAX_ROUNDS:
@@ -120,14 +103,7 @@ class DebateEngine:
         # Produz decisão final
         self._produce_decision(conflict, result, agent_outputs)
         
-        logger.info(
-            event="debate_completed",
-            message=f"Debate completed: {result.final_decision[:50]}...",
-            execution_id=context.execution_id,
-            conflict_id=conflict.conflict_id,
-            rounds=result.total_rounds,
-            confidence=result.confidence_score
-        )
+        print(f"[DEBATE] Completed in {result.total_rounds} rounds, confidence={result.confidence_score}")
         
         return result
     

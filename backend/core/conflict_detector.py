@@ -76,11 +76,7 @@ class ConflictDetector:
         agent_outputs = self._extract_agent_outputs(context)
         
         if len(agent_outputs) < 2:
-            logger.debug(
-                event="conflict_detection_skip",
-                message="Less than 2 agents with output, skipping conflict detection",
-                execution_id=context.execution_id
-            )
+            print(f"[CONFLICT] Skipping detection - less than 2 agents")
             return report
         
         # Detecta conflitos entre pares de agentes
@@ -118,17 +114,7 @@ class ConflictDetector:
                 report.debate_topics.append(conflict.topic)
         
         # Log
-        logger.info(
-            event="conflict_detection_complete",
-            message=f"Detected {report.total_conflicts} conflicts",
-            execution_id=context.execution_id,
-            total_conflicts=report.total_conflicts,
-            requires_debate=report.requires_debate,
-            extra_data={
-                "high_severity": report.has_high_severity,
-                "critical": report.has_critical_severity
-            }
-        )
+        print(f"[CONFLICT] Detected {report.total_conflicts} conflicts, requires_debate={report.requires_debate}")
         
         return report
     

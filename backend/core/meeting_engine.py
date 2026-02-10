@@ -82,12 +82,7 @@ class MeetingEngine:
         Returns:
             MeetingMinutes com ata executiva
         """
-        logger.info(
-            event="meeting_started",
-            message="Starting executive meeting",
-            execution_id=context.execution_id,
-            conflicts=conflict_report.total_conflicts
-        )
+        print(f"[MEETING] Starting executive meeting with {conflict_report.total_conflicts} conflicts")
         
         # Inicializa ata
         meeting_id = str(uuid.uuid4())
@@ -128,13 +123,7 @@ class MeetingEngine:
         # Calcula confiança
         minutes.confidence_score = self._calculate_meeting_confidence(minutes)
         
-        logger.info(
-            event="meeting_completed",
-            message="Executive meeting completed",
-            execution_id=context.execution_id,
-            decisions=len(minutes.decisions),
-            confidence=minutes.confidence_score
-        )
+        print(f"[MEETING] Completed with {len(minutes.decisions)} decisions, confidence={minutes.confidence_score}")
         
         return minutes
     
@@ -247,12 +236,7 @@ class MeetingEngine:
     ) -> None:
         """Executa uma fase da reunião"""
         
-        logger.debug(
-            event="meeting_phase_start",
-            message=f"Starting phase: {phase.value}",
-            execution_id=minutes.execution_id,
-            phase=phase.value
-        )
+        print(f"[MEETING] Phase: {phase.value}")
         
         # Obtém agenda items para esta fase
         phase_items = [item for item in minutes.agenda if item.phase == phase]
@@ -446,11 +430,7 @@ class MeetingOrchestrator:
         """
         
         if not self.engine.should_hold_meeting(conflict_report):
-            logger.debug(
-                event="meeting_skipped",
-                message="Meeting not needed",
-                execution_id=context.execution_id
-            )
+            print(f"[MEETING] Skipped - not needed")
             return None
         
         return self.engine.run(context, conflict_report, agent_outputs)
