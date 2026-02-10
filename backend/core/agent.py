@@ -125,17 +125,7 @@ class BaseAgent(ABC):
         metadata.start_time = datetime.now()
         
         # Log: Início da execução do agente
-        logger.info(
-            event="agent_started",
-            message=f"Agent {self.name} started execution",
-            execution_id=context.execution_id,
-            agent_name=self.name,
-            extra_data={
-                "model": self.model,
-                "timeout_seconds": self.timeout_seconds,
-                "dependencies": self.dependencies
-            }
-        )
+        print(f"[AGENT] {self.name} started execution")
         
         try:
             # Executa com timeout
@@ -151,18 +141,7 @@ class BaseAgent(ABC):
             context.set_agent_output(self.name, result, metadata)
             
             # Log: Sucesso da execução
-            logger.info(
-                event="agent_completed",
-                message=f"Agent {self.name} completed successfully",
-                execution_id=context.execution_id,
-                agent_name=self.name,
-                duration_ms=metadata.duration_seconds * 1000,
-                input_tokens=metadata.input_tokens,
-                output_tokens=metadata.output_tokens,
-                total_tokens=metadata.total_tokens,
-                cost_usd=metadata.cost_usd,
-                status="COMPLETED"
-            )
+            print(f"[AGENT] {self.name} completed in {metadata.duration_seconds*1000:.0f}ms")
             
             return context
             
@@ -173,15 +152,7 @@ class BaseAgent(ABC):
             context.set_agent_output(self.name, "", metadata)
             
             # Log: Timeout
-            logger.error(
-                event="agent_timeout",
-                message=f"Agent {self.name} timed out after {self.timeout_seconds}s",
-                execution_id=context.execution_id,
-                agent_name=self.name,
-                duration_ms=metadata.duration_seconds * 1000,
-                status="TIMEOUT",
-                error=metadata.error
-            )
+            print(f"[AGENT] {self.name} TIMEOUT after {self.timeout_seconds}s")
             
             raise TeamTimeoutError(self.name, self.timeout_seconds)
             
@@ -192,19 +163,7 @@ class BaseAgent(ABC):
             context.set_agent_output(self.name, "", metadata)
             
             # Log: Falha da execução
-            logger.error(
-                event="agent_failed",
-                message=f"Agent {self.name} failed with error: {str(e)}",
-                execution_id=context.execution_id,
-                agent_name=self.name,
-                duration_ms=metadata.duration_seconds * 1000,
-                status="FAILED",
-                error=str(e),
-                extra_data={
-                    "exception_type": type(e).__name__,
-                    "stacktrace": traceback.format_exc()
-                }
-            )
+            print(f"[AGENT] {self.name} FAILED: {str(e)}")
             
             raise AgentExecutionError(self.name, str(e), e)
     

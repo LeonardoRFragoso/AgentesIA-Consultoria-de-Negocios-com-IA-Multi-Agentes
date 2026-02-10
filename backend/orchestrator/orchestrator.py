@@ -41,35 +41,10 @@ class BusinessOrchestrator:
         context.started_at = datetime.now()
         
         # Log: Início da execução
-        logger.info(
-            event="execution_started",
-            message="Starting business analysis execution",
-            execution_id=context.execution_id,
-            extra_data={
-                "problem_length": len(context.problem_description),
-                "business_type": context.business_type,
-                "analysis_depth": context.analysis_depth,
-                "total_agents": len(self.agents),
-                "total_layers": len(self.execution_layers)
-            }
-        )
+        print(f"[ORCHESTRATOR] Starting execution with {len(self.agents)} agents, {len(self.execution_layers)} layers")
         
         # Log: Plano de execução
-        logger.debug(
-            event="execution_plan",
-            message="Execution plan generated",
-            execution_id=context.execution_id,
-            extra_data={
-                "layers": [
-                    {
-                        "layer": idx + 1,
-                        "agents": layer,
-                        "count": len(layer)
-                    }
-                    for idx, layer in enumerate(self.execution_layers)
-                ]
-            }
-        )
+        print(f"[ORCHESTRATOR] Execution plan: {self.execution_layers}")
         
         try:
             # Executa cada camada sequencialmente
@@ -85,31 +60,10 @@ class BusinessOrchestrator:
             )
             
             if all_completed:
-                logger.info(
-                    event="execution_completed",
-                    message="Business analysis execution completed successfully",
-                    execution_id=context.execution_id,
-                    duration_ms=context.get_total_latency_ms(),
-                    total_tokens=context.get_total_tokens(),
-                    cost_usd=context.get_total_cost(),
-                    status="COMPLETED"
-                )
+                print(f"[ORCHESTRATOR] Execution completed successfully in {context.get_total_latency_ms():.0f}ms")
             else:
-                logger.warning(
-                    event="execution_partial_failure",
-                    message="Business analysis execution completed with partial failures",
-                    execution_id=context.execution_id,
-                    duration_ms=context.get_total_latency_ms(),
-                    total_tokens=context.get_total_tokens(),
-                    cost_usd=context.get_total_cost(),
-                    status="PARTIAL_FAILURE",
-                    extra_data={
-                        "failed_agents": [
-                            name for name, meta in context.metadata.items()
-                            if meta.status != ExecutionStatus.COMPLETED
-                        ]
-                    }
-                )
+                failed = [name for name, meta in context.metadata.items() if meta.status != ExecutionStatus.COMPLETED]
+                print(f"[ORCHESTRATOR] Execution completed with failures: {failed}")
             
             return context
             
@@ -117,14 +71,7 @@ class BusinessOrchestrator:
             context.completed_at = datetime.now()
             
             # Log: Erro durante execução
-            logger.error(
-                event="execution_failed",
-                message=f"Business analysis execution failed: {str(e)}",
-                execution_id=context.execution_id,
-                duration_ms=context.get_total_latency_ms(),
-                status="FAILED",
-                error=str(e)
-            )
+            print(f"[ORCHESTRATOR] Execution failed: {str(e)}")
             raise
     
     async def _execute_layer(
@@ -144,14 +91,7 @@ class BusinessOrchestrator:
         layer_num = layer_idx + 1
         
         # Log: Início da camada
-        logger.info(
-            event="layer_started",
-            message=f"Starting execution of layer {layer_num}",
-            execution_id=context.execution_id,
-            layer=layer_num,
-            agents=agent_names,
-            extra_data={"agent_count": len(agent_names)}
-        )
+        print(f"[ORCHESTRATOR] Starting layer {layer_num} with agents: {agent_names}")
         
         layer_start_time = datetime.now()
         
@@ -184,26 +124,9 @@ class BusinessOrchestrator:
         
         # Log: Fim da camada
         if failed_agents:
-            logger.warning(
-                event="layer_completed_with_failures",
-                message=f"Layer {layer_num} completed with {len(failed_agents)} failure(s)",
-                execution_id=context.execution_id,
-                layer=layer_num,
-                duration_ms=layer_duration,
-                extra_data={
-                    "failed_agents": failed_agents,
-                    "successful_agents": [a for a in agent_names if a not in failed_agents]
-                }
-            )
+            print(f"[ORCHESTRATOR] Layer {layer_num} completed with failures: {failed_agents}")
         else:
-            logger.info(
-                event="layer_completed",
-                message=f"Layer {layer_num} completed successfully",
-                execution_id=context.execution_id,
-                layer=layer_num,
-                duration_ms=layer_duration,
-                agents=agent_names
-            )
+            print(f"[ORCHESTRATOR] Layer {layer_num} completed in {layer_duration:.0f}ms")
     
     def _handle_agent_failure(
         self,
