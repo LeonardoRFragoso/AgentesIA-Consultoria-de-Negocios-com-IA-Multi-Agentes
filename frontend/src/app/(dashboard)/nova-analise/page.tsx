@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/services/api-client';
 import { toast } from 'sonner';
@@ -22,7 +22,9 @@ import {
   X,
   File,
   FileSpreadsheet,
-  FileType
+  FileType,
+  Lock,
+  Crown
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -57,6 +59,20 @@ const FILE_ICONS: Record<string, React.ElementType> = {
   'text/plain': FileText,
 };
 
+const AVAILABLE_AGENTS = [
+  { id: 'analyst', name: 'Analista de Negócios', description: 'Análise estratégica', icon: FileText, color: 'blue' },
+  { id: 'commercial', name: 'Especialista Comercial', description: 'Estratégias de vendas', icon: Target, color: 'emerald' },
+  { id: 'financial', name: 'Especialista Financeiro', description: 'Análise financeira e ROI', icon: DollarSign, color: 'amber' },
+  { id: 'market', name: 'Especialista de Mercado', description: 'Tendências e concorrência', icon: TrendingUp, color: 'purple' },
+];
+
+interface AgentLimits {
+  max_agents: number;
+  plan: string;
+  agents: Array<{ id: string; name: string; description: string; emoji: string }>;
+  note: string;
+}
+
 export default function NovaAnalisePage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -68,6 +84,53 @@ export default function NovaAnalisePage() {
     business_type: 'SaaS',
     analysis_depth: 'Padrão',
   });
+  
+  // Agent selection state
+  const [agentLimits, setAgentLimits] = useState<AgentLimits | null>(null);
+  const [selectedAgents, setSelectedAgents] = useState<string[]>(['analyst', 'commercial']);
+  const [loadingLimits, setLoadingLimits] = useState(true);
+  
+  // Fetch agent limits on mount
+  useEffect(() => {
+    const fetchLimits = async () => {
+      try {
+        const limits = await apiClient.getAgentLimits();
+        setAgentLimits(limits);
+        // If Pro/Enterprise, select all agents
+        if (limits.max_agents >= 5) {
+          setSelectedAgents(['analyst', 'commercial', 'financial', 'market']);
+        }
+      } catch (error) {
+        console.error('Failed to fetch agent limits:', error);
+        // Default to Free plan limits
+        setAgentLimits({ max_agents: 2, plan: 'free', agents: [], note: '' });
+      } finally {
+        setLoadingLimits(false);
+      }
+    };
+    fetchLimits();
+  }, []);
+  
+  const toggleAgent = (agentId: string) => {
+    if (!agentLimits || agentLimits.max_agents >= 5) return; // Pro/Enterprise can't toggle
+    
+    setSelectedAgents(prev => {
+      if (prev.includes(agentId)) {
+        // Don't allow deselecting if only 1 selected
+        if (prev.length <= 1) return prev;
+        return prev.filter(a => a !== agentId);
+      } else {
+        // Don't allow selecting more than max
+        if (prev.length >= agentLimits.max_agents) {
+          toast.error(`Plano Free permite apenas ${agentLimits.max_agents} agentes. Faça upgrade para Pro!`);
+          return prev;
+        }
+        return [...prev, agentId];
+      }
+    });
+  };
+  
+  const isFreePlan = agentLimits && agentLimits.max_agents < 5;
 
   const handleFileSelect = (selectedFiles: FileList | null) => {
     if (!selectedFiles) return;
@@ -129,6 +192,7 @@ export default function NovaAnalisePage() {
             problem_description: formData.problem_description,
             business_type: formData.business_type,
             analysis_depth: formData.analysis_depth,
+            selected_agents: selectedAgents,
           });
 
       // Feedback visual: Análise iniciada
@@ -386,49 +450,130 @@ export default function NovaAnalisePage() {
             </div>
           </div>
 
-          {/* Agents Preview */}
-          <div className="bg-gradient-to-r from-primary/10 via-blue-500/10 to-purple-500/10 rounded-2xl p-6 lg:p-8 border border-primary/20">
-            <div className="flex items-center gap-2 mb-4">
-              <Users className="w-5 h-5 text-primary" />
-              <h3 className="font-semibold text-gray-900 dark:text-white">
-                Time de Agentes Especializados
-              </h3>
-            </div>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              Sua análise será processada por 5 agentes de IA com expertise complementar:
-            </p>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-              <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur rounded-xl px-4 py-3 text-center border border-white/50 dark:border-gray-700">
-                <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                  <FileText className="w-5 h-5 text-blue-500" />
-                </div>
-                <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Analista</span>
+          {/* Agent Selection */}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 lg:p-8 shadow-sm border border-gray-100 dark:border-gray-700">
+            <div className="flex items-start gap-3 mb-5">
+              <div className="p-2 rounded-xl bg-primary/10">
+                <Users className="w-5 h-5 text-primary" />
               </div>
-              <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur rounded-xl px-4 py-3 text-center border border-white/50 dark:border-gray-700">
-                <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                  <Target className="w-5 h-5 text-emerald-500" />
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <label className="block text-lg font-semibold text-gray-900 dark:text-white">
+                    Agentes Especializados
+                  </label>
+                  {isFreePlan && (
+                    <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-600 dark:text-amber-400 rounded-full">
+                      Free: {selectedAgents.length}/{agentLimits?.max_agents || 2}
+                    </span>
+                  )}
+                  {!isFreePlan && !loadingLimits && (
+                    <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-primary/20 text-primary rounded-full flex items-center gap-1">
+                      <Crown className="w-3 h-3" />
+                      Pro: Todos
+                    </span>
+                  )}
                 </div>
-                <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Comercial</span>
-              </div>
-              <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur rounded-xl px-4 py-3 text-center border border-white/50 dark:border-gray-700">
-                <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                  <DollarSign className="w-5 h-5 text-amber-500" />
-                </div>
-                <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Financeiro</span>
-              </div>
-              <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur rounded-xl px-4 py-3 text-center border border-white/50 dark:border-gray-700">
-                <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                  <TrendingUp className="w-5 h-5 text-purple-500" />
-                </div>
-                <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Mercado</span>
-              </div>
-              <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur rounded-xl px-4 py-3 text-center border border-white/50 dark:border-gray-700">
-                <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-rose-500/10 flex items-center justify-center">
-                  <Sparkles className="w-5 h-5 text-rose-500" />
-                </div>
-                <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Executivo</span>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  {isFreePlan 
+                    ? `Selecione ${agentLimits?.max_agents || 2} agentes para sua análise. O Revisor Executivo é incluído automaticamente.`
+                    : 'Todos os agentes especializados trabalharão em sua análise.'
+                  }
+                </p>
               </div>
             </div>
+            
+            {loadingLimits ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin text-primary" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {AVAILABLE_AGENTS.map((agent) => {
+                  const Icon = agent.icon;
+                  const isSelected = selectedAgents.includes(agent.id);
+                  const canToggle = isFreePlan;
+                  const colorClasses: Record<string, string> = {
+                    blue: 'bg-blue-500/10 text-blue-500',
+                    emerald: 'bg-emerald-500/10 text-emerald-500',
+                    amber: 'bg-amber-500/10 text-amber-500',
+                    purple: 'bg-purple-500/10 text-purple-500',
+                  };
+                  
+                  return (
+                    <button
+                      key={agent.id}
+                      type="button"
+                      onClick={() => canToggle && toggleAgent(agent.id)}
+                      disabled={!canToggle}
+                      className={`relative group p-4 rounded-xl border-2 transition-all text-left ${
+                        isSelected
+                          ? 'border-primary bg-primary/5 dark:bg-primary/10'
+                          : canToggle
+                            ? 'border-gray-200 dark:border-gray-700 hover:border-primary/50'
+                            : 'border-gray-200 dark:border-gray-700 opacity-100'
+                      } ${!canToggle ? 'cursor-default' : 'cursor-pointer'}`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${colorClasses[agent.color]}`}>
+                          <Icon className="w-5 h-5" />
+                        </div>
+                        <div className="flex-1">
+                          <span className={`font-medium block ${isSelected ? 'text-primary' : 'text-gray-700 dark:text-gray-300'}`}>
+                            {agent.name}
+                          </span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                            {agent.description}
+                          </span>
+                        </div>
+                        {canToggle && (
+                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                            isSelected 
+                              ? 'border-primary bg-primary' 
+                              : 'border-gray-300 dark:border-gray-600'
+                          }`}>
+                            {isSelected && <CheckCircle2 className="w-4 h-4 text-white" />}
+                          </div>
+                        )}
+                        {!canToggle && (
+                          <CheckCircle2 className="w-5 h-5 text-primary" />
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+            
+            {/* Reviewer always included */}
+            <div className="mt-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-rose-500/20 flex items-center justify-center">
+                <Sparkles className="w-5 h-5 text-rose-500" />
+              </div>
+              <div>
+                <span className="font-medium text-gray-700 dark:text-gray-300">Revisor Executivo</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400 block">
+                  Incluído automaticamente - consolida análises em resumo executivo
+                </span>
+              </div>
+              <CheckCircle2 className="w-5 h-5 text-rose-500 ml-auto" />
+            </div>
+            
+            {isFreePlan && (
+              <div className="mt-4 p-3 rounded-xl bg-gradient-to-r from-primary/10 to-blue-500/10 border border-primary/20">
+                <div className="flex items-center gap-2">
+                  <Crown className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Quer todos os 5 agentes?
+                  </span>
+                  <Link 
+                    href="/billing" 
+                    className="ml-auto text-sm font-semibold text-primary hover:underline"
+                  >
+                    Fazer upgrade para Pro
+                  </Link>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Submit Button */}

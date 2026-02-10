@@ -140,12 +140,24 @@ class ApiClient {
     return response.data;
   }
 
+  // Billing methods
+  async getAgentLimits() {
+    const response = await this.client.get('/billing/agent-limits');
+    return response.data;
+  }
+
+  async getBillingPlans() {
+    const response = await this.client.get('/billing/plans');
+    return response.data;
+  }
+
   // Analysis methods
   async createAnalysis(data: {
     problem_description: string;
     business_type?: string;
     analysis_depth?: string;
     use_cache?: boolean;
+    selected_agents?: string[];
   }) {
     const response = await this.client.post('/async/analyses', data);
     return response.data;
