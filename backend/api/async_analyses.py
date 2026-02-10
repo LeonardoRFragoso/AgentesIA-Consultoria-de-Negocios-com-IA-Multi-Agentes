@@ -77,7 +77,7 @@ class AnalysisDetailResponse(BaseModel):
 # ENDPOINTS
 # =============================================================================
 
-@router.post("/async", response_model=AsyncAnalysisResponse, status_code=status.HTTP_202_ACCEPTED)
+@router.post("", response_model=AsyncAnalysisResponse, status_code=status.HTTP_202_ACCEPTED)
 async def create_async_analysis(
     data: AsyncAnalysisCreate,
     tenant: TenantContext = Depends(get_tenant_context)
