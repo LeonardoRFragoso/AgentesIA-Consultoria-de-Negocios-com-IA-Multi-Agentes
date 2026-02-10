@@ -142,7 +142,12 @@ class AsyncAnalysisService:
         # Tenta cache
         cached = self.cache.get("analysis", cache_key)
         if cached:
-            return cached
+            # Migração: cache antigo usa 'analysis_id', novo usa 'id'
+            if "analysis_id" in cached and "id" not in cached:
+                # Cache antigo - invalida e busca do banco
+                self.cache.delete("analysis", cache_key)
+            else:
+                return cached
         
         # Busca no banco
         with tenant_session(self.org_id) as db:
