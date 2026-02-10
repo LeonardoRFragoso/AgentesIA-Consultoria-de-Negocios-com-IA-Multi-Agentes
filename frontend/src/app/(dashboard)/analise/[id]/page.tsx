@@ -253,7 +253,8 @@ function ExportDropdown({ analysisId }: { analysisId: string }) {
   const handleExport = async (format: string) => {
     setIsExporting(format);
     try {
-      const response = await fetch(`http://localhost:8000/api/v1/async/analyses/${analysisId}/export/${format}`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${apiUrl}/api/v1/async/analyses/${analysisId}/export/${format}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${document.cookie.split('access_token=')[1]?.split(';')[0] || ''}`,
