@@ -1,6 +1,12 @@
 # 🧠 AgentesIA - Consultoria de Negócios com IA Multi-Agentes
 
+[![Deploy Backend](https://img.shields.io/badge/Backend-Railway-purple)](https://railway.app)
+[![Deploy Frontend](https://img.shields.io/badge/Frontend-Vercel-black)](https://vercel.com)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 Plataforma SaaS de análise estratégica de negócios que utiliza múltiplos agentes de IA especializados para fornecer diagnósticos completos e acionáveis.
+
+**🌐 Live Demo**: [agentes-ia-consultoria-de-negocios.vercel.app](https://agentes-ia-consultoria-de-negocios.vercel.app)
 
 ## 🎯 Visão Geral
 
@@ -8,62 +14,68 @@ O **AgentesIA** é uma plataforma completa que simula um time executivo de consu
 
 - **Análise multi-perspectiva** de problemas de negócio
 - **5 agentes especializados** trabalhando em conjunto
-- **Upload de arquivos** (CSV, Excel, PDF) para análise contextualizada
-- **Consultor IA Contínuo** - chat de follow-up pós-análise
-- **Exportação de relatórios** em PDF, DOCX e PPTX
+- **Processamento assíncrono** com Redis para alta performance
+- **Exportação de relatórios** em PDF, PPTX e Markdown
 - **Sistema de planos** (Free, Pro, Enterprise) com limites configuráveis
+- **Multi-tenant** com isolamento por organização
 
 ## ✨ Funcionalidades Principais
 
-### � Análise Multi-Agentes
+### 🤖 Análise Multi-Agentes
+
 | Agente | Especialidade |
 |--------|---------------|
-| 🔍 **Analista de Negócio** | Interpreta problemas e levanta hipóteses |
+| � **Analista de Negócio** | Interpreta problemas e levanta hipóteses |
 | 💼 **Estrategista Comercial** | Propõe ações práticas e estratégias |
 | 💰 **Analista Financeiro** | Avalia viabilidade e ROI |
-| � **Especialista de Mercado** | Valida com benchmarks e tendências |
-| 👔 **Revisor Executivo** | Consolida análises em decisão final |
+| 📈 **Especialista de Mercado** | Valida com benchmarks e tendências |
+| 👔 **Revisor Executivo** | Consolida análises em resumo executivo |
 
-### � Consultor IA Contínuo (Novo!)
-Continue a conversa após a análise para:
-- Aprofundar pontos específicos
-- Esclarecer dúvidas
-- Refinar estratégias
-- A IA já conhece seu contexto e dados
+### � Exportação de Relatórios
 
-### 📎 Upload de Arquivos
-Anexe dados para análise contextualizada:
-- **CSV/TXT**: Extração completa de texto
-- **Excel (.xlsx)**: Leitura de até 3 abas, 50 linhas
-- **PDF**: Extração de até 10 páginas
-
-### 📥 Exportação de Relatórios
-Exporte análises completas (incluindo chat de refino):
-- **PDF**: Formatação profissional
-- **DOCX**: Editável no Word
-- **PPTX**: Pronto para apresentações
+- **Markdown**: Formato leve e universal
+- **PDF**: Formatação profissional (Pro/Enterprise)
+- **PPTX**: Pronto para apresentações (Pro/Enterprise)
 
 ## 💰 Planos e Limites
 
-| Recurso | Free | Pro (R$99/mês) | Enterprise (R$299/mês) |
+| Recurso | Free | Pro (R$97/mês) | Enterprise (R$297/mês) |
 |---------|------|----------------|------------------------|
 | Análises/mês | 5 | 50 | Ilimitado |
-| Agentes | 3 | 5 | 5 |
-| Perguntas de refino/análise | 3 | 20 | Ilimitado |
-| Exportação PDF | ❌ | ✅ | ✅ |
-| Exportação DOCX/PPTX | ❌ | ❌ | ✅ |
+| Agentes | **Escolhe 2** | Todos os 5 | Todos os 5 |
+| Exportação | Markdown | PDF, PPTX, MD | Todos formatos |
+| Usuários | 1 | 5 | Ilimitado |
+| Histórico | 7 dias | 90 dias | 365 dias |
+
+## 🏗️ Arquitetura
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   Frontend      │────▶│   Backend       │────▶│   Claude API    │
+│   (Next.js)     │     │   (FastAPI)     │     │   (Anthropic)   │
+│   Vercel        │     │   Railway       │     │                 │
+└─────────────────┘     └────────┬────────┘     └─────────────────┘
+                                 │
+                    ┌────────────┼────────────┐
+                    ▼            ▼            ▼
+             ┌──────────┐ ┌──────────┐ ┌──────────┐
+             │PostgreSQL│ │  Redis   │ │  Redis   │
+             │  (DB)    │ │ (Cache)  │ │ (Queue)  │
+             └──────────┘ └──────────┘ └──────────┘
+```
 
 ## 🚀 Como Executar
 
 ### Pré-requisitos
-- Python 3.10+
+- Python 3.11+
 - Node.js 18+
+- Redis (opcional para desenvolvimento)
 - Chave de API da Anthropic
 
 ### 1. Clone o repositório
 ```bash
-git clone https://github.com/LeonardoRFragoso/Agente-Multi-Agentes-de-Negocio-com-Streamlit.git
-cd Agente-Multi-Agentes-de-Negocio-com-Streamlit
+git clone https://github.com/LeonardoRFragoso/AgentesIA-Consultoria-de-Negocios-com-IA-Multi-Agentes.git
+cd AgentesIA-Consultoria-de-Negocios-com-IA-Multi-Agentes
 ```
 
 ### 2. Configure o Backend
@@ -83,7 +95,7 @@ cp .env.example .env
 # Edite .env e adicione sua ANTHROPIC_API_KEY
 
 # Inicie o servidor
-python -m uvicorn main:app --reload --port 8000
+python -m uvicorn app:app --reload --port 8000
 ```
 
 ### 3. Configure o Frontend
@@ -95,6 +107,7 @@ npm install
 
 # Configure variáveis de ambiente
 cp .env.example .env.local
+# Adicione: NEXT_PUBLIC_API_URL=http://localhost:8000
 
 # Inicie o servidor de desenvolvimento
 npm run dev
@@ -103,46 +116,46 @@ npm run dev
 ### 4. Acesse a aplicação
 - **Frontend**: http://localhost:3000
 - **API Docs**: http://localhost:8000/docs
+- **Health Check**: http://localhost:8000/health
 
 ## 📁 Estrutura do Projeto
 
 ```
-agentesia/
 ├── backend/                    # API FastAPI
-│   ├── main.py                 # Endpoints principais
+│   ├── app.py                  # Aplicação principal
+│   ├── config.py               # Configurações
 │   ├── agents/                 # Agentes de IA
 │   │   ├── analyst.py
 │   │   ├── commercial.py
 │   │   ├── financial.py
 │   │   ├── market.py
 │   │   └── reviewer.py
+│   ├── api/                    # Endpoints REST
+│   │   ├── auth.py             # Autenticação JWT
+│   │   ├── analyses.py         # CRUD de análises
+│   │   ├── async_analyses.py   # Análises assíncronas
+│   │   └── billing.py          # Planos e limites
 │   ├── core/                   # Lógica central
 │   │   ├── agent.py            # Classe base de agentes
-│   │   ├── types.py            # Tipos e modelos
-│   │   └── exceptions.py
+│   │   └── types.py            # Tipos e modelos
+│   ├── database/               # Modelos e conexão
+│   ├── infrastructure/         # Cache, Queue, Logging
 │   ├── orchestrator/           # Orquestração de agentes
-│   │   ├── orchestrator.py
-│   │   └── dag.py              # Resolução de dependências
-│   ├── prompts/                # Prompts dos agentes
-│   └── requirements.txt
+│   ├── prompts/                # Prompts dos agentes (.md)
+│   ├── security/               # Auth e JWT
+│   ├── services/               # Lógica de negócio
+│   ├── team/                   # BusinessTeam wrapper
+│   └── Dockerfile
 │
-├── frontend/                   # Next.js + React
+├── frontend/                   # Next.js 14
 │   ├── src/
-│   │   ├── app/                # Páginas (App Router)
-│   │   │   ├── (auth)/         # Login/Register
-│   │   │   ├── (dashboard)/    # Dashboard protegido
-│   │   │   │   ├── dashboard/
-│   │   │   │   ├── nova-analise/
-│   │   │   │   ├── analise/[id]/
-│   │   │   │   └── billing/
-│   │   │   └── page.tsx        # Landing page
+│   │   ├── app/                # App Router
 │   │   ├── components/         # Componentes React
-│   │   ├── services/           # API client
-│   │   └── stores/             # Estado global (Zustand)
+│   │   └── services/           # API client
 │   └── package.json
 │
 ├── docs/                       # Documentação
-└── docker-compose.yml          # Deploy com Docker
+└── docker-compose.yml          # Deploy local
 ```
 
 ## 💡 Exemplos de Uso
@@ -168,107 +181,56 @@ Anexo: churn_dados.xlsx
 ## 🔄 Fluxo de Funcionamento
 
 ```
-1. Usuário descreve problema + anexa arquivos (opcional)
+1. Usuário descreve problema de negócio
    ↓
-2. Sistema extrai conteúdo dos arquivos
+2. Sistema valida plano e agentes disponíveis
    ↓
-3. Analista interpreta e levanta hipóteses
+3. Task enfileirada no Redis
    ↓
-4. Comercial propõe estratégias
+4. Agentes executam em paralelo (DAG)
    ↓
-5. Financeiro avalia viabilidade (Pro/Enterprise)
+5. Revisor consolida análises
    ↓
-6. Mercado valida contexto (Pro/Enterprise)
+6. Resultado salvo no banco
    ↓
-7. Revisor consolida análises
+7. Usuário visualiza diagnóstico executivo
    ↓
-8. Diagnóstico executivo é exibido
-   ↓
-9. Usuário pode refinar com perguntas de follow-up
-   ↓
-10. Exportar relatório completo (Pro/Enterprise)
+8. Exportar relatório (Pro/Enterprise)
 ```
 
-## 🎨 Interface
-
-### Landing Page
-- Hero com proposta de valor
-- Destaque do recurso "Consultor IA Contínuo"
-- Features e benefícios
-- Planos e preços
-
-### Dashboard
-- Lista de análises recentes
-- Status em tempo real (pending, running, completed)
-- Acesso rápido a nova análise
-
-### Página de Análise
-- Visualização por agente (abas)
-- Chat de refino com contador de uso
-- Exportação em múltiplos formatos
-- Animação de loading com carrossel de agentes
-
-## �️ Tecnologias
+## 🛠️ Tecnologias
 
 ### Backend
-- **Framework**: FastAPI
-- **IA**: Claude (Anthropic) via API
-- **Autenticação**: JWT
-- **PDF**: ReportLab
-- **DOCX**: python-docx
-- **PPTX**: python-pptx
-- **Excel**: openpyxl
-- **PDF Reader**: PyPDF2
+- **Framework**: FastAPI + Gunicorn
+- **IA**: Claude 3 (Anthropic)
+- **Banco de dados**: PostgreSQL
+- **Cache/Queue**: Redis
+- **Autenticação**: JWT (PyJWT + bcrypt)
+- **Exportação**: ReportLab (PDF), python-pptx (PPTX)
 
 ### Frontend
 - **Framework**: Next.js 14 (App Router)
-- **UI**: Tailwind CSS
+- **UI**: Tailwind CSS + Framer Motion
 - **Componentes**: Lucide Icons
-- **Estado**: Zustand
 - **HTTP**: Axios
-- **Notificações**: Sonner
+- **Deploy**: Vercel
 
-## 📈 Roadmap
-
-- [x] ~~Integração com dados reais (CSV, Excel, PDF)~~
-- [x] ~~Exportação em PDF, DOCX, PPTX~~
-- [x] ~~Chat de refino pós-análise~~
-- [x] ~~Sistema de planos e limites~~
-- [x] ~~Containerização com Docker~~
-- [ ] Integração com Mercado Pago (pagamentos)
-- [ ] Memória de longo prazo por empresa
-- [ ] Histórico de análises persistente
-- [ ] Modo comparativo (cenário A vs B)
-- [ ] Deploy em produção
-
-## 🛠️ Troubleshooting
-
-### Erro: "ANTHROPIC_API_KEY not found"
-```bash
-# Verifique o arquivo .env no backend
-cat backend/.env
-# Deve conter: ANTHROPIC_API_KEY=sk-ant-...
-```
-
-### Erro: "Module not found"
-```bash
-cd backend
-pip install -r requirements.txt
-```
-
-### Frontend não conecta ao backend
-```bash
-# Verifique se o backend está rodando na porta 8000
-# E se o frontend tem NEXT_PUBLIC_API_URL=http://localhost:8000
-```
+### Infraestrutura
+- **Backend**: Railway
+- **Frontend**: Vercel
+- **Database**: Railway PostgreSQL
+- **Cache**: Redis Cloud
 
 ## 📝 Variáveis de Ambiente
 
 ### Backend (.env)
 ```env
+ENVIRONMENT=development
 ANTHROPIC_API_KEY=sk-ant-xxxxx
-SECRET_KEY=sua-chave-jwt-secreta
-DATABASE_URL=sqlite:///./agentesia.db
+JWT_SECRET_KEY=sua-chave-jwt-secreta
+DATABASE_URL=postgresql://user:pass@host:5432/db
+REDIS_URL=redis://localhost:6379  # opcional em dev
+CORS_ORIGINS=["http://localhost:3000"]
 ```
 
 ### Frontend (.env.local)
@@ -276,10 +238,25 @@ DATABASE_URL=sqlite:///./agentesia.db
 NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
 
-## � Docker
+## � Deploy em Produção
+
+### Railway (Backend)
+1. Conecte o repositório
+2. Configure Root Directory: `backend`
+3. Adicione PostgreSQL
+4. Configure variáveis de ambiente
+5. Deploy automático via Git
+
+### Vercel (Frontend)
+1. Importe o repositório
+2. Configure Root Directory: `frontend`
+3. Adicione `NEXT_PUBLIC_API_URL` apontando para Railway
+4. Deploy automático
+
+## 🐳 Docker (Local)
 
 ```bash
-# Build e run
+# Build e run completo
 docker-compose up --build
 
 # Apenas backend
