@@ -52,9 +52,24 @@ class BusinessTeam:
             analysis_depth="Padrão"
         )
         
-        # Executa análise (converte async para sync para Streamlit)
+        # Executa análise (converte async para sync)
         print("🔍 Iniciando análise com time de especialistas...")
-        result_context = asyncio.run(self.orchestrator.execute(self.context))
+        
+        # Verifica se já existe um event loop rodando
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = None
+        
+        if loop and loop.is_running():
+            # Se já tem loop rodando, cria novo loop em thread separada
+            import concurrent.futures
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                future = executor.submit(asyncio.run, self.orchestrator.execute(self.context))
+                result_context = future.result()
+        else:
+            # Caso normal (Streamlit, scripts)
+            result_context = asyncio.run(self.orchestrator.execute(self.context))
         
         print("✅ Análise concluída!")
         
