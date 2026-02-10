@@ -310,23 +310,29 @@ async def handle_analysis_task(payload: Dict[str, Any]) -> Dict[str, Any]:
         from team.business_team import BusinessTeam
         
         team = BusinessTeam()
-        results = team.run_analysis(
-            problem=payload["problem_description"],
+        results = team.analyze_business_scenario(
+            problem_description=payload["problem_description"],
             business_type=payload["business_type"],
-            analysis_depth=payload["analysis_depth"],
         )
         
         # Salva resultados
+        # analyze_business_scenario retorna: {analyst, commercial, financial, market, executive}
         with get_db_session() as db:
             analysis = db.query(Analysis).filter(Analysis.id == analysis_id).first()
             
             analysis.status = AnalysisStatus.COMPLETED
             analysis.completed_at = datetime.utcnow()
-            analysis.results = results.get("results", {})
-            analysis.executive_summary = results.get("executive_summary", "")
-            analysis.total_tokens = results.get("total_tokens", 0)
-            analysis.total_cost_usd = results.get("total_cost", 0.0)
-            analysis.total_latency_ms = results.get("total_latency_ms", 0.0)
+            analysis.results = {
+                "analyst": results.get("analyst", ""),
+                "commercial": results.get("commercial", ""),
+                "financial": results.get("financial", ""),
+                "market": results.get("market", ""),
+            }
+            analysis.executive_summary = results.get("executive", "")
+            # TODO: capturar métricas do orquestrador quando disponível
+            analysis.total_tokens = 0
+            analysis.total_cost_usd = 0.0
+            analysis.total_latency_ms = 0.0
             
             db.commit()
             
