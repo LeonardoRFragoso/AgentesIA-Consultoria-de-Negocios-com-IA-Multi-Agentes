@@ -340,11 +340,21 @@ async def handle_analysis_task(payload: Dict[str, Any]) -> Dict[str, Any]:
             
             db.commit()
             
+            # Serializa com todos os campos necessários para AnalysisDetailResponse
             serialized = {
-                "analysis_id": str(analysis.id),
+                "id": str(analysis.id),
+                "problem_description": analysis.problem_description,
+                "business_type": analysis.business_type,
+                "analysis_depth": analysis.analysis_depth,
                 "status": "completed",
-                "results": analysis.results,
                 "executive_summary": analysis.executive_summary,
+                "results": analysis.results,
+                "total_tokens": analysis.total_tokens or 0,
+                "total_cost_usd": analysis.total_cost_usd or 0.0,
+                "total_latency_ms": analysis.total_latency_ms or 0.0,
+                "created_at": analysis.created_at.isoformat() if analysis.created_at else None,
+                "completed_at": analysis.completed_at.isoformat() if analysis.completed_at else None,
+                "error_message": None,
             }
         
         # Atualiza cache
