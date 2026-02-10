@@ -311,7 +311,8 @@ async def handle_analysis_task(payload: Dict[str, Any]) -> Dict[str, Any]:
         # Executa orquestrador multi-agentes
         from team.business_team import BusinessTeam
         
-        selected_agents = payload.get("selected_agents", ["analyst", "commercial", "financial", "market", "reviewer"])
+        selected_agents = payload.get("selected_agents", ["analyst", "commercial"])
+        logger.info(f"Executando análise com agentes: {selected_agents}")
         team = BusinessTeam(selected_agents=selected_agents)
         results = team.analyze_business_scenario(
             problem_description=payload["problem_description"],
