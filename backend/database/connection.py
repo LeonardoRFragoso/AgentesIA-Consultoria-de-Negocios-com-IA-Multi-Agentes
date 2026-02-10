@@ -112,10 +112,12 @@ def init_db() -> Engine:
         expire_on_commit=False,  # Evita queries extras após commit
     )
     
-    # Cria tabelas automaticamente apenas em desenvolvimento com SQLite
-    if settings.is_development() and is_sqlite:
-        logger.info("Criando tabelas automaticamente (dev mode)")
-        Base.metadata.create_all(_engine)
+    # Cria tabelas automaticamente
+    # Em produção: cria apenas se não existirem (checkfirst=True é o default)
+    # Em desenvolvimento: sempre cria
+    logger.info("Verificando/criando tabelas do banco de dados...")
+    Base.metadata.create_all(_engine)
+    logger.info("Tabelas verificadas/criadas com sucesso")
     
     logger.info(f"Database inicializado: {db_url.split('@')[-1] if '@' in db_url else 'local'}")
     
