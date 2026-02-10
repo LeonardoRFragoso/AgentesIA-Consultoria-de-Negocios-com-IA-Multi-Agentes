@@ -269,6 +269,13 @@ class RedisQueue(TaskQueue):
         if self._running:
             return
         
+        # Verifica se Redis está disponível antes de iniciar worker
+        try:
+            self._redis.ping()
+        except Exception as e:
+            logger.warning(f"Redis não disponível, worker não será iniciado: {e}")
+            return
+        
         self._running = True
         self._worker_thread = threading.Thread(target=self._worker_loop, daemon=True)
         self._worker_thread.start()
@@ -282,8 +289,12 @@ class RedisQueue(TaskQueue):
     
     def _worker_loop(self):
         """Loop principal do worker."""
+        import time
         from config import get_settings
         settings = get_settings()
+        
+        error_count = 0
+        max_backoff = 60  # máximo 60 segundos entre tentativas
         
         while self._running:
             try:
@@ -292,12 +303,26 @@ class RedisQueue(TaskQueue):
                 if result:
                     _, task_id = result
                     self._executor.submit(self._process_task, task_id)
+                error_count = 0  # Reset on success
             except Exception as e:
-                # Apenas log em produção - em dev, Redis é opcional
-                if settings.is_production():
-                    logger.error(f"Worker error: {e}")
-                else:
-                    logger.debug(f"Worker error (development - Redis optional): {e}")
+                error_count += 1
+                # Backoff exponencial para evitar spam de logs
+                backoff = min(2 ** error_count, max_backoff)
+                
+                # Log apenas na primeira ocorrência e a cada 10 erros
+                if error_count == 1 or error_count % 10 == 0:
+                    if settings.is_production():
+                        logger.error(f"Worker error (attempt {error_count}): {e}")
+                    else:
+                        logger.debug(f"Worker error (development): {e}")
+                
+                # Para o worker se muitos erros consecutivos (Redis provavelmente down)
+                if error_count >= 50:
+                    logger.error("Worker stopped: too many consecutive errors")
+                    self._running = False
+                    break
+                
+                time.sleep(backoff)
     
     def _process_task(self, task_id: str):
         """Processa uma task."""
