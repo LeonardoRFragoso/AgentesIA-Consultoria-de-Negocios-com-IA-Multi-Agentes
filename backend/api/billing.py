@@ -15,6 +15,76 @@ from api.schemas import BillingStatusResponse, CheckoutSessionResponse
 router = APIRouter(prefix="/billing", tags=["Billing"])
 
 
+@router.get("/plans")
+async def get_plans():
+    """
+    Retorna lista de planos disponíveis.
+    Endpoint público (não requer autenticação).
+    """
+    return {
+        "plans": [
+            {
+                "id": "free",
+                "name": "Free",
+                "price": 0,
+                "currency": "BRL",
+                "interval": "month",
+                "features": [
+                    "5 análises por mês",
+                    "Agentes básicos",
+                    "Exportação Markdown",
+                    "Suporte por email"
+                ],
+                "limits": {
+                    "analyses_per_month": 5,
+                    "export_formats": ["markdown"],
+                    "priority_support": False
+                }
+            },
+            {
+                "id": "pro",
+                "name": "Pro",
+                "price": 97,
+                "currency": "BRL",
+                "interval": "month",
+                "features": [
+                    "50 análises por mês",
+                    "Todos os agentes",
+                    "Exportação PDF e PowerPoint",
+                    "Suporte prioritário",
+                    "Histórico completo"
+                ],
+                "limits": {
+                    "analyses_per_month": 50,
+                    "export_formats": ["markdown", "pdf", "pptx"],
+                    "priority_support": True
+                }
+            },
+            {
+                "id": "enterprise",
+                "name": "Enterprise",
+                "price": 297,
+                "currency": "BRL",
+                "interval": "month",
+                "features": [
+                    "Análises ilimitadas",
+                    "Todos os agentes",
+                    "Todos os formatos de exportação",
+                    "Suporte dedicado",
+                    "API access",
+                    "White-label"
+                ],
+                "limits": {
+                    "analyses_per_month": -1,
+                    "export_formats": ["markdown", "pdf", "pptx", "xlsx"],
+                    "priority_support": True,
+                    "api_access": True
+                }
+            }
+        ]
+    }
+
+
 @router.get("/status", response_model=BillingStatusResponse)
 async def get_billing_status(
     db: Session = Depends(get_db),
